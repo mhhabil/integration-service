@@ -243,14 +243,14 @@ export class ConfigService {
 
   get redisRBAC() {
     return {
-      host: this.get('RBAC_CONNECTION_HOST'),
-      port: this.get('RBAC_CONNECTION_PORT'),
-      prefix: this.get('RBAC_CONNECTION_PREFIX'),
-      password: this.get('RBAC_CONNECTION_PASSWORD'),
-      role: this.get('RBAC_CONNECTION_ROLE'),
-      user: this.get('RBAC_CONNECTION_USERNAME'),
-      db: this.get('RBAC_CONNECTION_DB'),
-      connectionName: this.get('RBAC_CONNECTION_NAME'),
+      host: this.get('RBAC_REDIS_HOST'),
+      port: this.get('RBAC_REDIS_PORT'),
+      prefix: this.get('RBAC_REDIS_PREFIX'),
+      password: this.get('RBAC_REDIS_PASSWORD'),
+      role: this.get('RBAC_REDIS_ROLE'),
+      user: this.get('RBAC_REDIS_USERNAME'),
+      db: this.get('RBAC_REDIS_DB'),
+      connectionName: this.get('RBAC_REDIS_NAME'),
     };
   }
 

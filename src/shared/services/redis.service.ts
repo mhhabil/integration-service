@@ -1,28 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { RedisService } from '@liaoliaots/nestjs-redis';
-import { Redis } from 'ioredis';
+import {
+  RedisService,
+  DEFAULT_REDIS_NAMESPACE,
+} from '@liaoliaots/nestjs-redis';
+import { ReJson } from '../rejson';
 
 @Injectable()
 export class RedisSharedService {
-  private readonly redis: Redis;
+  protected rejson: ReJson;
 
-  constructor(private readonly redisService: RedisService) {
-    this.redis = this.redisService.getClient();
+  constructor(private redisService: RedisService) {
+    const cl = this.redisService.getClient(DEFAULT_REDIS_NAMESPACE);
+    this.rejson = new ReJson(cl);
   }
 
-  async set(key: string, value: string | number | Buffer) {
-    this.redis.set(key, value).then((result) => {
-      if (result === 'OK') {
-        return true;
-      } else {
-        throw new Error(result);
-      }
-    });
+  async set(key: string, path: string, value: any) {
+    try {
+      this.rejson.set(key, path, value);
+    } catch (err) {
+      console.error(err);
+      throw new Error('Post Data Redis Failed');
+    }
   }
 
-  async get(key: string) {
-    this.redis
-      .get(key)
+  async get(key: string, path: string) {
+    this.rejson
+      .get(key, path)
       .then((value) => {
         return value;
       })
