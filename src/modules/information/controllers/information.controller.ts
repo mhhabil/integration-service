@@ -37,9 +37,10 @@ export class InformationController {
   @Get()
   async findById(
     @Query('hospital_id') hospital_id: string,
+    @Query('type_id') type_id: string,
     @Res() res: Response,
   ): Promise<void> {
-    const result = await this.informationService.findById(hospital_id);
+    const result = await this.informationService.findById(hospital_id, type_id);
     if (result) {
       res.status(HttpStatus.OK).json({
         data: result,
