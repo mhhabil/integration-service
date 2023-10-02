@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import { ISwaggerConfigInterface } from 'src/interfaces';
 
 export class ConfigService {
   constructor() {
@@ -48,15 +49,15 @@ export class ConfigService {
     return prefix;
   }
 
-  // get swaggerConfig(): ISwaggerConfigInterface {
-  //   return {
-  //     path: this.get('SWAGGER_PATH') || '/api/docs',
-  //     title: this.get('SWAGGER_TITLE') || 'My API',
-  //     description: this.get('SWAGGER_DESCRIPTION'),
-  //     version: this.get('SWAGGER_VERSION') || '0.0.1',
-  //     scheme: this.get('SWAGGER_SCHEME') === 'https' ? 'https' : 'http',
-  //   };
-  // }
+  get swaggerConfig(): ISwaggerConfigInterface {
+    return {
+      path: this.get('SWAGGER_PATH') || '/api/docs',
+      title: this.get('SWAGGER_TITLE') || 'My API',
+      description: this.get('SWAGGER_DESCRIPTION'),
+      version: this.get('SWAGGER_VERSION') || '0.0.1',
+      scheme: this.get('SWAGGER_SCHEME') === 'https' ? 'https' : 'http',
+    };
+  }
 
   // get typeOrmConfig(): TypeOrmModuleOptions {
   //   let entities = [__dirname + '/../../modules/**/*.entity{.ts,.js}'];
