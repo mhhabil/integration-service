@@ -3,3 +3,9 @@ export interface IJWTPayload {
   exp: number;
   iat: number;
 }
+
+export interface IJWTUser {
+  id: string;
+  exp: number;
+  service: any;
+}
