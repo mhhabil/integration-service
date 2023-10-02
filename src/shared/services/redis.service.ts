@@ -24,14 +24,6 @@ export class RedisSharedService {
   }
 
   async get(key: string, path: string) {
-    this.rejson
-      .get(key, path)
-      .then((value) => {
-        return value;
-      })
-      .catch((error) => {
-        console.error(error);
-        throw new Error('Get Data Redis Failed');
-      });
+    return await this.rejson.get(key, path);
   }
 }

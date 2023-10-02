@@ -1,8 +1,10 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module, Global } from '@nestjs/common';
+import { ConfigService } from './services/config.service';
 import { RedisSharedService } from './services/redis.service';
+import { DatetimeService } from './services/datetime.service';
 
-const providers = [RedisSharedService];
+const providers = [RedisSharedService, ConfigService, DatetimeService];
 
 @Global()
 @Module({
