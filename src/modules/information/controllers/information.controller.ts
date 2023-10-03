@@ -9,6 +9,13 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { InformationCreateDto } from '../dtos/information-create.dto';
 import { InformationService } from '../services/information.service';
@@ -16,10 +23,14 @@ import { Request, Response } from 'express';
 import { IJWTUser } from 'src/auth/jwt-payload.interface';
 
 @Controller('information')
+@ApiTags('Information')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class InformationController {
   constructor(private informationService: InformationService) {}
 
+  @ApiOperation({ summary: 'Create Information' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Information Created' })
   @Post()
   async create(
     @Body() payload: InformationCreateDto,
@@ -34,6 +45,10 @@ export class InformationController {
     });
   }
 
+  @ApiOperation({ summary: 'Get Information' })
+  @ApiResponse({ status: HttpStatus.FOUND, description: 'Information Found' })
+  @ApiQuery({ name: 'hospital_id', required: true })
+  @ApiQuery({ name: 'type_id', required: true })
   @Get()
   async findById(
     @Query('hospital_id') hospital_id: string,
@@ -42,9 +57,8 @@ export class InformationController {
   ): Promise<void> {
     const result = await this.informationService.findById(hospital_id, type_id);
     if (result) {
-      res.status(HttpStatus.OK).json({
+      res.status(HttpStatus.FOUND).json({
         data: result,
-        message: 'OK',
       });
     } else {
       res.status(HttpStatus.NOT_FOUND).json({
