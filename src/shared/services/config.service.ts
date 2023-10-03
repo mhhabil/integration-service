@@ -1,4 +1,6 @@
 import * as dotenv from 'dotenv';
+import * as winston from 'winston';
+import * as DailyRotateFile from 'winston-daily-rotate-file';
 import { ISwaggerConfigInterface } from 'src/interfaces';
 
 export class ConfigService {
@@ -147,53 +149,54 @@ export class ConfigService {
   //   };
   // }
 
-  // get winstonConfig() {
-  //   return {
-  //     transports: [
-  //       new DailyRotateFile({
-  //         level: 'debug',
-  //         filename: `./logs/${this.nodeEnv}/debug-%DATE%.log`,
-  //         datePattern: 'YYYY-MM-DD',
-  //         zippedArchive: true,
-  //         maxSize: '20m',
-  //         maxFiles: '14d',
-  //         format: winston.format.combine(
-  //           winston.format.timestamp(),
-  //           winston.format.json(),
-  //         ),
-  //       }),
-  //       new DailyRotateFile({
-  //         level: 'error',
-  //         filename: `./logs/${this.nodeEnv}/error-%DATE%.log`,
-  //         datePattern: 'YYYY-MM-DD',
-  //         zippedArchive: false,
-  //         maxSize: '20m',
-  //         maxFiles: '30d',
-  //         format: winston.format.combine(
-  //           winston.format.timestamp(),
-  //           winston.format.json(),
-  //         ),
-  //       }),
-  //       new winston.transports.Console({
-  //         level: 'debug',
-  //         handleExceptions: true,
-  //         format: winston.format.combine(
-  //           winston.format.colorize(),
-  //           winston.format.timestamp({
-  //             format: 'DD-MM-YYYY HH:mm:ss',
-  //           }),
-  //           winston.format.simple(),
-  //         ),
-  //       }),
-  //     ],
-  //     exitOnError: false,
-  //   };
-  // }
+  get winstonConfig() {
+    return {
+      transports: [
+        new DailyRotateFile({
+          level: 'debug',
+          filename: `./logs/${this.nodeEnv}/debug-%DATE%.log`,
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '20m',
+          maxFiles: '14d',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json(),
+          ),
+        }),
+        new DailyRotateFile({
+          level: 'error',
+          filename: `./logs/${this.nodeEnv}/error-%DATE%.log`,
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: false,
+          maxSize: '20m',
+          maxFiles: '30d',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json(),
+          ),
+        }),
+        new winston.transports.Console({
+          level: 'debug',
+          handleExceptions: true,
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.timestamp({
+              format: 'DD-MM-YYYY HH:mm:ss',
+            }),
+            winston.format.simple(),
+          ),
+        }),
+      ],
+      exitOnError: false,
+    };
+  }
 
   get elastic() {
     return {
       apm: {
         enabled: this.get('ELASTIC_APM_ENABLED') == 'true',
+        apiKey: this.get('ELASTIC_APM_API_KEY'),
         serviceName: this.get('ELASTIC_APM_SERVICE_NAME'),
         secretToken: this.get('ELASTIC_APM_SECRET_TOKEN'),
         serverUrl: this.get('ELASTIC_APM_SERVER_URL'),
@@ -203,6 +206,8 @@ export class ConfigService {
       },
       search: {
         enabled: this.get('ELASTIC_SEARCH_ENABLED') || false,
+        cloudId: this.get('ELASTIC_SEARCH_CLOUD_ID'),
+        apiKey: this.get('ELASTIC_SEARCH_API_KEY'),
       },
     };
   }
