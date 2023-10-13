@@ -41,12 +41,13 @@ export class InformationController {
     const userId = user.id;
     await this.informationService.create(payload, userId);
     res.status(HttpStatus.CREATED).json({
+      error: false,
       message: 'OK',
     });
   }
 
   @ApiOperation({ summary: 'Get Information' })
-  @ApiResponse({ status: HttpStatus.FOUND, description: 'Information Found' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Information Found' })
   @ApiQuery({ name: 'hospital_id', required: true })
   @ApiQuery({ name: 'type_id', required: true })
   @Get()
@@ -57,12 +58,14 @@ export class InformationController {
   ): Promise<void> {
     const result = await this.informationService.findById(hospital_id, type_id);
     if (result) {
-      res.status(HttpStatus.FOUND).json({
+      res.status(HttpStatus.OK).json({
+        error: false,
         data: result,
       });
     } else {
       res.status(HttpStatus.NOT_FOUND).json({
-        message: 'Data tidak ditemukan',
+        error: true,
+        message: 'Data not found',
       });
     }
   }
