@@ -1,3 +1,5 @@
+import { AuthService } from './auth.service';
+
 export interface IJWTPayload {
   user_id: string;
   exp: number;
@@ -7,5 +9,5 @@ export interface IJWTPayload {
 export interface IJWTUser {
   id: string;
   exp: number;
-  service: any;
+  service: AuthService;
 }

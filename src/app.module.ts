@@ -6,8 +6,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { RedisModule } from '@liaoliaots/nestjs-redis';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { InformationController } from './modules/information/controllers/information.controller';
-import { InformationService } from './modules/information/services/information.service';
 import RequiredModules from './modules';
 
 @Module({
@@ -44,7 +42,7 @@ import RequiredModules from './modules';
     AuthModule,
     ...RequiredModules,
   ],
-  controllers: [AppController, InformationController],
-  providers: [AppService, InformationService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

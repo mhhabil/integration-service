@@ -20,11 +20,11 @@ export class AuthService {
   };
 
   getEmployeeId = async (id: string): Promise<string> => {
-    return await this.rejson.get(id, '.employee_id');
+    return await this.rejson.get(`user_role:${id}`, '.employee_id');
   };
 
   getModules = async (id: string): Promise<[]> => {
-    return await this.rejson.get(id, '.modules');
+    return await this.rejson.get(`user_role:${id}`, '.modules');
   };
 
   hasModule = async (id, module: string): Promise<boolean> => {
@@ -50,19 +50,19 @@ export class AuthService {
   };
 
   async getCompanies(id: string): Promise<Array<string>> {
-    return await this.rejson.get(id, '.company_list');
+    return await this.rejson.get(`user_role:${id}`, '.company_list');
   }
 
   getRole = async (id: string): Promise<string> => {
-    return await this.rejson.get(id, '.role');
+    return await this.rejson.get(`user_role:${id}`, '.role');
   };
 
   getDivisions = async (id: string): Promise<Array<string>> => {
-    return await this.rejson.get(id, '.divisi_list');
+    return await this.rejson.get(`user_role:${id}`, '.divisi_list');
   };
 
   getLocations = async (id: string): Promise<Array<string>> => {
-    return await this.rejson.get(id, '.location_list');
+    return await this.rejson.get(`user_role:${id}`, '.location_list');
   };
 
   isSuper = async (id: string): Promise<boolean> => {
