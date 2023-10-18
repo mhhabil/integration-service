@@ -44,7 +44,6 @@ export class AuthService {
       await this.getModules(id),
       '$[?(@.module_code=="' + module + '")]',
     );
-    console.log('RESULT HAS ABILITY', result);
     if (result && result.length > 0) return result[0][action];
     else return false;
   };
