@@ -1,7 +1,15 @@
-export class InformationCreateDto {
-  integration_type_id: string;
+export interface IInformationCreateDto {
   hospital_id: string;
-  organization_id: string;
-  client_key: string;
-  secret_key: string;
+}
+
+export class InformationCreateDto {
+  hospital_id: string;
+
+  constructor(params: IInformationCreateDto) {
+    this.hospital_id = params.hospital_id;
+  }
+
+  static create(body: IInformationCreateDto) {
+    return new InformationCreateDto(body);
+  }
 }
