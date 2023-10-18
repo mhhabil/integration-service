@@ -1,5 +1,4 @@
 import {
-  Body,
   Controller,
   Get,
   Post,
@@ -8,6 +7,7 @@ import {
   HttpStatus,
   Req,
   Res,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,10 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { InformationCreateDto } from '../dtos/information-create.dto';
 import { InformationService } from '../services/information.service';
 import { Request, Response } from 'express';
-import { IJWTUser } from 'src/auth/jwt-payload.interface';
 
 @Controller('information')
 @ApiTags('Information')
@@ -31,15 +29,13 @@ export class InformationController {
 
   @ApiOperation({ summary: 'Create Information' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Information Created' })
-  @Post()
+  @Post(':type_id')
   async create(
-    @Body() payload: InformationCreateDto,
+    @Param() params: { type_id: string },
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const user: IJWTUser = req.user as any;
-    const userId = user.id;
-    await this.informationService.create(payload, userId);
+    await this.informationService.create(req, params.type_id);
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
