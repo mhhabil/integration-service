@@ -59,9 +59,11 @@ export class InformationController {
         data: result,
       });
     } else {
-      res.status(HttpStatus.NOT_FOUND).json({
-        error: true,
-        message: 'Data not found',
+      res.status(HttpStatus.OK).json({
+        error: false,
+        data: {
+          type_id,
+        },
       });
     }
   }
