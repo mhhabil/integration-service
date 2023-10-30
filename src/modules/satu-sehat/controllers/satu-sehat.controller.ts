@@ -7,7 +7,7 @@ import {
   HttpStatus,
   Req,
   Res,
-  Param,
+  Body,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -17,42 +17,47 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { InformationService } from '../services/information.service';
 import { Request, Response } from 'express';
+import { SatuSehatService } from '../services/satu-sehat.service';
+import { SatuSehatInformationDto } from '../dtos/satu-sehat-information-create.dto';
+import { IJWTUser } from 'src/auth/jwt-payload.interface';
 
-@Controller('information')
-@ApiTags('Information')
+@Controller('satu-sehat')
+@ApiTags('SatuSehat')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-export class InformationController {
-  constructor(private informationService: InformationService) {}
+export class SatuSehatController {
+  constructor(private satusehatService: SatuSehatService) {}
 
-  @ApiOperation({ summary: 'Create Information' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Information Created' })
-  @Post(':type_id')
-  async create(
-    @Param() params: { type_id: string },
+  @ApiOperation({ summary: 'Create SatuSehat Information' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'SatuSehat Information Created',
+  })
+  @Post('info')
+  async createInformation(
+    @Body() payload: SatuSehatInformationDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.informationService.create(req, params.type_id);
+    const user: IJWTUser = req.user as any;
+    const userId = user.id;
+    await this.satusehatService.informationCreate(payload, userId);
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
     });
   }
 
-  @ApiOperation({ summary: 'Get Information' })
+  @ApiOperation({ summary: 'Get SatuSehat Information' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Information Found' })
   @ApiQuery({ name: 'hospital_id', required: true })
-  @ApiQuery({ name: 'type_id', required: true })
-  @Get()
-  async findById(
+  @Get('info')
+  async findInformationById(
     @Query('hospital_id') hospital_id: string,
-    @Query('type_id') type_id: string,
     @Res() res: Response,
   ): Promise<void> {
-    const result = await this.informationService.findById(hospital_id, type_id);
+    const result = await this.satusehatService.findInformationById(hospital_id);
     if (result) {
       res.status(HttpStatus.OK).json({
         error: false,
@@ -62,7 +67,7 @@ export class InformationController {
       res.status(HttpStatus.OK).json({
         error: false,
         data: {
-          type_id,
+          type_id: 'satusehat',
         },
       });
     }
