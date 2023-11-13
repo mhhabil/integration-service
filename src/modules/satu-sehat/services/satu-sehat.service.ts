@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { RedisSharedService } from 'src/shared/services/redis.service';
 import { DatetimeService } from 'src/shared/services/datetime.service';
 import { SatuSehatInformationDto } from '../dtos/satu-sehat-information-create.dto';
+import { ExternalSatuSehatService } from 'src/shared/services/satusehat/external.satusehat.service';
 
 @Injectable()
 export class SatuSehatService {
   constructor(
     private redisService: RedisSharedService,
     private datetimeService: DatetimeService,
+    private externalSatusehatService: ExternalSatuSehatService,
   ) {}
 
   async informationCreate(request: SatuSehatInformationDto, userId: string) {
@@ -53,5 +55,56 @@ export class SatuSehatService {
       '.',
     );
     return result;
+  }
+
+  async findPractitionerByNIK(hospital_id: string, nik: string) {
+    const data = await this.externalSatusehatService.getIHSPractitioner(
+      hospital_id,
+      nik,
+    );
+    if (data && data.resource) {
+      const nameArray: any[] = data.resource.name;
+      const identifiers = data.resource.identifier;
+      const ihs = identifiers.find((i) => i.system.includes('his-number'));
+      const nik = identifiers.find((i) => i.system.includes('nik'));
+      const name =
+        Array.isArray(nameArray) && nameArray[0] && nameArray[0].text
+          ? nameArray[0].text
+          : '';
+
+      return {
+        url: data.fullUrl,
+        ihs_number: ihs ? ihs.value : null,
+        nik: nik ? nik.value : null,
+        name,
+      };
+    } else {
+      return undefined;
+    }
+  }
+
+  async findPatientByNIK(hospital_id: string, nik: string) {
+    const data = await this.externalSatusehatService.getIHSPatient(
+      hospital_id,
+      nik,
+    );
+    if (data && data.resource) {
+      const nameArray: any[] = data.resource.name;
+      const identifiers = data.resource.identifier;
+      const ihs = identifiers.find((i) => i.system.includes('ihs-number'));
+      const name =
+        Array.isArray(nameArray) && nameArray[0] && nameArray[0].text
+          ? nameArray[0].text
+          : '';
+
+      return {
+        url: data.fullUrl,
+        ihs_number: ihs ? ihs.value : null,
+        nik,
+        name,
+      };
+    } else {
+      return undefined;
+    }
   }
 }
