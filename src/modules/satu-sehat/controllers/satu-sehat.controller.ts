@@ -29,6 +29,60 @@ import { IJWTUser } from 'src/auth/jwt-payload.interface';
 export class SatuSehatController {
   constructor(private satusehatService: SatuSehatService) {}
 
+  @ApiOperation({ summary: 'Get Practitioner By NIK' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Practitioner Found' })
+  @ApiQuery({ name: 'hospital_id', required: true })
+  @ApiQuery({ name: 'nik', required: true })
+  @Get('practitioner')
+  async getPractitioner(
+    @Query('hospital_id') hospital_id: string,
+    @Query('nik') nik: string,
+    @Res() res: Response,
+  ) {
+    const result = await this.satusehatService.findPractitionerByNIK(
+      hospital_id,
+      nik,
+    );
+    if (result) {
+      res.status(HttpStatus.OK).json({
+        error: false,
+        data: result,
+      });
+    } else {
+      res.status(HttpStatus.NOT_FOUND).json({
+        error: true,
+        data: {},
+      });
+    }
+  }
+
+  @ApiOperation({ summary: 'Get Patient By NIK' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Patient Found' })
+  @ApiQuery({ name: 'hospital_id', required: true })
+  @ApiQuery({ name: 'nik', required: true })
+  @Get('patient')
+  async getPatient(
+    @Query('hospital_id') hospital_id: string,
+    @Query('nik') nik: string,
+    @Res() res: Response,
+  ) {
+    const result = await this.satusehatService.findPatientByNIK(
+      hospital_id,
+      nik,
+    );
+    if (result) {
+      res.status(HttpStatus.OK).json({
+        error: false,
+        data: result,
+      });
+    } else {
+      res.status(HttpStatus.NOT_FOUND).json({
+        error: true,
+        data: {},
+      });
+    }
+  }
+
   @ApiOperation({ summary: 'Create SatuSehat Information' })
   @ApiResponse({
     status: HttpStatus.OK,
