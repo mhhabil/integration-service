@@ -3,6 +3,8 @@ import { RedisSharedService } from 'src/shared/services/redis.service';
 import { DatetimeService } from 'src/shared/services/datetime.service';
 import { SatuSehatInformationDto } from '../dtos/satu-sehat-information-create.dto';
 import { ExternalSatuSehatService } from 'src/shared/services/satusehat/external.satusehat.service';
+import { ISatuSehatOrganizationCreateDto } from '../dtos/satu-sehat-organization-create.dto';
+import { ISatuSehatLocationCreateDto } from '../dtos/satu-sehat-location-create.dto';
 
 @Injectable()
 export class SatuSehatService {
@@ -106,5 +108,36 @@ export class SatuSehatService {
     } else {
       return undefined;
     }
+  }
+
+  async findOrganizationById(hospital_id: string) {
+    const data =
+      await this.externalSatusehatService.getOrganizationByPartOf(hospital_id);
+    return data;
+  }
+
+  async createOrganization(payload: ISatuSehatOrganizationCreateDto) {
+    const information = await this.redisService.get(
+      `Information:{${payload.hospital_id}}:satusehat`,
+      '.',
+    );
+    const id = await this.externalSatusehatService.createOrganization(
+      payload,
+      information.organization_id,
+    );
+    return id;
+  }
+
+  async findLocationById(hospital_id: string, orgId: string) {
+    const data = await this.externalSatusehatService.getLocationByOrgId(
+      hospital_id,
+      orgId,
+    );
+    return data;
+  }
+
+  async createLocation(payload: ISatuSehatLocationCreateDto) {
+    const id = await this.externalSatusehatService.createLocation(payload);
+    return id;
   }
 }
