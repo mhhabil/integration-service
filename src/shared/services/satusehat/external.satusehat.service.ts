@@ -175,7 +175,7 @@ export class ExternalSatuSehatService {
     );
     const { data, status } = await firstValueFrom(
       this.httpService
-        .get(`${config.base_url}/Location?name=${orgId}`, {
+        .get(`${config.base_url}/Location?organization=${orgId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
