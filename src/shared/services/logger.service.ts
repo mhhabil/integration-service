@@ -13,19 +13,20 @@ export class LoggerService extends ConsoleLogger {
     private readonly _elasticService: ElasticsearchService,
   ) {
     super(LoggerService.name, { timestamp: true });
-    let winstonConfig: winston.LoggerOptions = _configService.winstonConfig;
+    let winstonConfig: winston.LoggerOptions =
+      this._configService.winstonConfig;
 
-    if (_configService.elastic.apm.enabled) {
+    if (this._configService.elastic.apm.enabled) {
       winstonConfig = {
         transports: [
-          ..._configService.winstonConfig.transports,
-          _elasticService.apmTransport,
+          ...this._configService.winstonConfig.transports,
+          this._elasticService.apmTransport,
         ],
-        exitOnError: _configService.winstonConfig.exitOnError,
+        exitOnError: this._configService.winstonConfig.exitOnError,
       };
     }
     this._logger = winston.createLogger(winstonConfig);
-    if (_configService.nodeEnv !== 'production') {
+    if (this._configService.nodeEnv !== 'production') {
       this._logger.debug('Logging initialiazed at debug level');
     }
   }
@@ -46,5 +47,45 @@ export class LoggerService extends ConsoleLogger {
   }
   warn(message: string): void {
     this._logger.warn(message);
+  }
+
+  //Elastic Logger
+  elasticInfo(
+    message: string,
+    branch: string,
+    req: object,
+    res: object,
+    code: number,
+  ): void {
+    this._logger.info(
+      `${this._configService.elastic.apm.serviceName}${message}`,
+      {
+        service_name: this._configService.elastic.apm.serviceName,
+        branch,
+        environment: this._configService.nodeEnv,
+        request: JSON.stringify(req),
+        code,
+        response: JSON.stringify(res),
+      },
+    );
+  }
+  elasticError(
+    message: string,
+    branch: string,
+    req: object,
+    res: object,
+    code: string,
+  ): void {
+    this._logger.error(
+      `${this._configService.elastic.apm.serviceName}${message}`,
+      {
+        service_name: this._configService.elastic.apm.serviceName,
+        branch,
+        environment: this._configService.nodeEnv,
+        request: JSON.stringify(req),
+        code,
+        response: JSON.stringify(res),
+      },
+    );
   }
 }
