@@ -7,22 +7,24 @@ import { ISatuSehatOrganizationCreateDto } from 'src/modules/satu-sehat/dtos/sat
 import { ExternalSatuSehatOrganizationDto } from './dtos/external.satusehat-organization.dto';
 import { ISatuSehatLocationCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-location-create.dto';
 import { ExternalSatuSehatLocationDto } from './dtos/external.satusehat-location.dto';
+import { LoggerService } from '../logger.service';
 
 @Injectable()
 export class ExternalSatuSehatService {
   constructor(
-    private readonly httpService: HttpService,
-    private readonly redisService: RedisSharedService,
+    private readonly _httpService: HttpService,
+    private readonly _redisService: RedisSharedService,
+    private readonly _loggerService: LoggerService,
   ) {}
 
   async oauth(hospital_id: string) {
-    const information = await this.redisService.get(
+    const information = await this._redisService.get(
       `Information:{${hospital_id}}:satusehat`,
       '.',
     );
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
     const { data } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .post(
           `${config.auth_url}/accesstoken?grant_type=client_credentials`,
           {
@@ -37,8 +39,14 @@ export class ExternalSatuSehatService {
         )
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
-            throw 'Error';
+            this._loggerService.elasticError(
+              '/accesstoken?grant_type=client_credentials',
+              hospital_id,
+              error.request,
+              error.response,
+              error.code,
+            );
+            throw error.message;
           }),
         ),
     );
@@ -46,13 +54,13 @@ export class ExternalSatuSehatService {
   }
 
   async getIHSPractitioner(hospital_id: string, nik: string) {
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
-    const token = await this.redisService.get(
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const token = await this._redisService.get(
       `Auth:{SatuSehat}:${hospital_id}`,
       'access_token',
     );
     const { data } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .get(
           `${config.base_url}/Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|${nik}`,
           {
@@ -74,13 +82,13 @@ export class ExternalSatuSehatService {
   }
 
   async getIHSPatient(hospital_id: string, nik: string) {
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
-    const token = await this.redisService.get(
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const token = await this._redisService.get(
       `Auth:{SatuSehat}:${hospital_id}`,
       'access_token',
     );
     const { data } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .get(
           `${config.base_url}/Patient?identifier=https://fhir.kemkes.go.id/id/nik|${nik}`,
           {
@@ -102,17 +110,17 @@ export class ExternalSatuSehatService {
   }
 
   async getOrganizationByPartOf(hospital_id: string) {
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
-    const token = await this.redisService.get(
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const token = await this._redisService.get(
       `Auth:{SatuSehat}:${hospital_id}`,
       'access_token',
     );
-    const partOfId = await this.redisService.get(
+    const partOfId = await this._redisService.get(
       `Information:{${hospital_id}}:satusehat`,
       '.organization_id',
     );
     const { data, status } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .get(`${config.base_url}/Organization?partof=${partOfId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -138,14 +146,14 @@ export class ExternalSatuSehatService {
     payload: ISatuSehatOrganizationCreateDto,
     id: string,
   ) {
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
-    const token = await this.redisService.get(
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const token = await this._redisService.get(
       `Auth:{SatuSehat}:${payload.hospital_id}`,
       'access_token',
     );
     const params = ExternalSatuSehatOrganizationDto.createRequest(payload, id);
     const { data, status } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .post(`${config.base_url}/Organization`, params, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -168,13 +176,13 @@ export class ExternalSatuSehatService {
   }
 
   async getLocationByOrgId(hospital_id: string, orgId: string) {
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
-    const token = await this.redisService.get(
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const token = await this._redisService.get(
       `Auth:{SatuSehat}:${hospital_id}`,
       'access_token',
     );
     const { data, status } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .get(`${config.base_url}/Location?organization=${orgId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -197,14 +205,14 @@ export class ExternalSatuSehatService {
   }
 
   async createLocation(payload: ISatuSehatLocationCreateDto) {
-    const config = await this.redisService.get(`Config:SatuSehat`, '.');
-    const token = await this.redisService.get(
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const token = await this._redisService.get(
       `Auth:{SatuSehat}:${payload.hospital_id}`,
       'access_token',
     );
     const params = ExternalSatuSehatLocationDto.createRequest(payload);
     const { data, status } = await firstValueFrom(
-      this.httpService
+      this._httpService
         .post(`${config.base_url}/Location`, params, {
           headers: {
             Authorization: `Bearer ${token}`,
