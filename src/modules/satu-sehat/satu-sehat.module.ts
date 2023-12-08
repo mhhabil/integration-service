@@ -22,6 +22,7 @@ export class SatuSehatModule implements NestModule {
       .exclude(
         { path: 'satu-sehat/info', method: RequestMethod.GET },
         { path: 'satu-sehat/info', method: RequestMethod.POST },
+        { path: 'satu-sehat/status', method: RequestMethod.GET },
       )
       .forRoutes(SatuSehatController);
   }
