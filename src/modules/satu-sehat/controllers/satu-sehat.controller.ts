@@ -23,13 +23,30 @@ import { SatuSehatInformationDto } from '../dtos/satu-sehat-information-create.d
 import { IJWTUser } from 'src/auth/jwt-payload.interface';
 import { ISatuSehatOrganizationCreateDto } from '../dtos/satu-sehat-organization-create.dto';
 import { ISatuSehatLocationCreateDto } from '../dtos/satu-sehat-location-create.dto';
+import { LoggerService } from 'src/shared/services/logger.service';
 
 @Controller('satu-sehat')
 @ApiTags('SatuSehat')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class SatuSehatController {
-  constructor(private satusehatService: SatuSehatService) {}
+  constructor(
+    private satusehatService: SatuSehatService,
+    private _loggerService: LoggerService,
+  ) {}
+
+  @Get('status')
+  async getStatus(
+    @Query('hospital_id') hospital_id: string,
+    @Res() res: Response,
+  ) {
+    const status = await this.satusehatService.findStatus(hospital_id);
+    res.status(HttpStatus.OK).json({
+      error: false,
+      message: 'OK',
+      status,
+    });
+  }
 
   @ApiOperation({ summary: 'Get Practitioner By NIK' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Practitioner Found' })
@@ -39,6 +56,7 @@ export class SatuSehatController {
   async getPractitioner(
     @Query('hospital_id') hospital_id: string,
     @Query('nik') nik: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const result = await this.satusehatService.findPractitionerByNIK(
@@ -46,13 +64,25 @@ export class SatuSehatController {
       nik,
     );
     if (result) {
+      this._loggerService.elasticInfo(req.path, hospital_id, req.query, {
+        error: false,
+        message: 'OK',
+        data: result,
+      });
       res.status(HttpStatus.OK).json({
         error: false,
+        message: 'OK',
         data: result,
       });
     } else {
+      this._loggerService.elasticError(req.path, hospital_id, req.query, {
+        error: true,
+        message: 'Data not found',
+        data: {},
+      });
       res.status(HttpStatus.NOT_FOUND).json({
         error: true,
+        message: 'Data not found',
         data: {},
       });
     }
@@ -66,6 +96,7 @@ export class SatuSehatController {
   async getPatient(
     @Query('hospital_id') hospital_id: string,
     @Query('nik') nik: string,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     const result = await this.satusehatService.findPatientByNIK(
@@ -73,13 +104,25 @@ export class SatuSehatController {
       nik,
     );
     if (result) {
+      this._loggerService.elasticInfo(req.path, hospital_id, req.query, {
+        error: false,
+        message: 'OK',
+        data: result,
+      });
       res.status(HttpStatus.OK).json({
         error: false,
+        message: 'OK',
         data: result,
       });
     } else {
+      this._loggerService.elasticError(req.path, hospital_id, req.query, {
+        error: true,
+        message: 'Data not found',
+        data: {},
+      });
       res.status(HttpStatus.NOT_FOUND).json({
         error: true,
+        message: 'Data not found',
         data: {},
       });
     }
@@ -99,6 +142,10 @@ export class SatuSehatController {
     const user: IJWTUser = req.user as any;
     const userId = user.id;
     await this.satusehatService.informationCreate(payload, userId);
+    this._loggerService.elasticInfo(req.path, payload.hospital_id, req.body, {
+      error: false,
+      message: 'OK',
+    });
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
@@ -157,6 +204,10 @@ export class SatuSehatController {
       ...payload,
       hospital_id: req.query.hospital_id as string,
     });
+    this._loggerService.elasticInfo(req.path, payload.hospital_id, payload, {
+      error: false,
+      message: 'OK',
+    });
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
@@ -193,6 +244,10 @@ export class SatuSehatController {
     await this.satusehatService.createLocation({
       ...payload,
       hospital_id: req.query.hospital_id as string,
+    });
+    this._loggerService.elasticInfo(req.path, payload.hospital_id, payload, {
+      error: false,
+      message: 'OK',
     });
     res.status(HttpStatus.CREATED).json({
       error: false,
