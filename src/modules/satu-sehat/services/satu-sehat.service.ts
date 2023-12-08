@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RedisSharedService } from 'src/shared/services/redis.service';
 import { DatetimeService } from 'src/shared/services/datetime.service';
 import { SatuSehatInformationDto } from '../dtos/satu-sehat-information-create.dto';
-import { ExternalSatuSehatService } from 'src/shared/services/satusehat/external.satusehat.service';
+import { ExternalSatuSehatService } from 'src/shared/services/satusehat/services/external.satusehat.service';
 import { ISatuSehatOrganizationCreateDto } from '../dtos/satu-sehat-organization-create.dto';
 import { ISatuSehatLocationCreateDto } from '../dtos/satu-sehat-location-create.dto';
 
@@ -13,6 +13,15 @@ export class SatuSehatService {
     private datetimeService: DatetimeService,
     private externalSatusehatService: ExternalSatuSehatService,
   ) {}
+
+  async findStatus(hospitalId: string) {
+    const result = await this.redisService.get(
+      `Information:{${hospitalId}}:satusehat`,
+      '.',
+    );
+
+    return !!result;
+  }
 
   async informationCreate(request: SatuSehatInformationDto, userId: string) {
     const currentDatetime = this.datetimeService.getCurrentDatetime();
@@ -138,6 +147,13 @@ export class SatuSehatService {
 
   async createLocation(payload: ISatuSehatLocationCreateDto) {
     const id = await this.externalSatusehatService.createLocation(payload);
+    if (id) {
+      this.redisService.set(
+        `Information:{${payload.hospital_id}}:satusehat`,
+        '$.location_id',
+        id,
+      );
+    }
     return id;
   }
 }

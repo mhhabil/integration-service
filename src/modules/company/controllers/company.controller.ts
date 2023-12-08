@@ -59,19 +59,6 @@ export class CompanyController {
       const authorizedCompanies = result.companies.filter((company) =>
         companyList.includes(company.code),
       );
-      this._loggerService.elasticInfo(
-        req.path,
-        '',
-        {},
-        {
-          error: false,
-          data: {
-            ...result,
-            companies: authorizedCompanies,
-          },
-        },
-        200,
-      );
       res.status(HttpStatus.OK).json({
         error: false,
         data: {

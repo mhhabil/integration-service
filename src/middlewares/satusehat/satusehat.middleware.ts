@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, NextFunction } from 'express';
 import { RedisSharedService } from 'src/shared/services/redis.service';
-import { ExternalSatuSehatService } from 'src/shared/services/satusehat/external.satusehat.service';
+import { ExternalSatuSehatService } from 'src/shared/services/satusehat/services/external.satusehat.service';
 import { AuthSatuSehat } from './interfaces/auth-satusehat';
 
 @Injectable()

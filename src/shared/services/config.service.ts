@@ -40,6 +40,12 @@ export class ConfigService {
     };
   }
 
+  get messaging() {
+    return {
+      url: this.get('EMR_API_URL'),
+    };
+  }
+
   get apiPrefix() {
     let prefix = this.get('API_PREFIX');
     if (!prefix) {
@@ -58,6 +64,14 @@ export class ConfigService {
       description: this.get('SWAGGER_DESCRIPTION'),
       version: this.get('SWAGGER_VERSION') || '0.0.1',
       scheme: this.get('SWAGGER_SCHEME') === 'https' ? 'https' : 'http',
+    };
+  }
+
+  get alya() {
+    return {
+      host: this.get('ALYA_HOST'),
+      room: this.get('ALYA_ROOM'),
+      secret: this.get('ALYA_SECRET'),
     };
   }
 

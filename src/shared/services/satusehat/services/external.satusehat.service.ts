@@ -2,12 +2,12 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { RedisSharedService } from '../redis.service';
+import { RedisSharedService } from '../../redis.service';
 import { ISatuSehatOrganizationCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-organization-create.dto';
-import { ExternalSatuSehatOrganizationDto } from './dtos/external.satusehat-organization.dto';
+import { ExternalSatuSehatOrganizationDto } from '../dtos/organization/external.satusehat-organization.dto';
 import { ISatuSehatLocationCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-location-create.dto';
-import { ExternalSatuSehatLocationDto } from './dtos/external.satusehat-location.dto';
-import { LoggerService } from '../logger.service';
+import { ExternalSatuSehatLocationDto } from '../dtos/location/external.satusehat-location.dto';
+import { LoggerService } from '../../logger.service';
 
 @Injectable()
 export class ExternalSatuSehatService {
@@ -44,7 +44,6 @@ export class ExternalSatuSehatService {
               hospital_id,
               error.request,
               error.response,
-              error.code,
             );
             throw error.message;
           }),
@@ -71,11 +70,22 @@ export class ExternalSatuSehatService {
         )
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
-            throw 'Error';
+            this._loggerService.elasticError(
+              '/practitioner',
+              hospital_id,
+              {
+                nik,
+              },
+              {
+                error,
+                message: error.message,
+              },
+            );
+            throw error.message;
           }),
         ),
     );
+    console.log('data', data);
     return data.entry && Array.isArray(data.entry) && data.entry[0]
       ? data.entry[0]
       : {};
@@ -99,7 +109,17 @@ export class ExternalSatuSehatService {
         )
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
+            this._loggerService.elasticError(
+              '/patient',
+              hospital_id,
+              {
+                nik,
+              },
+              {
+                error,
+                message: error.message,
+              },
+            );
             throw 'Error';
           }),
         ),
@@ -161,7 +181,15 @@ export class ExternalSatuSehatService {
         })
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
+            this._loggerService.elasticError(
+              '/organization',
+              payload.hospital_id,
+              payload,
+              {
+                error,
+                message: error.message,
+              },
+            );
             throw 'Error';
           }),
         ),
@@ -220,7 +248,15 @@ export class ExternalSatuSehatService {
         })
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
+            this._loggerService.elasticError(
+              '/location',
+              payload.hospital_id,
+              payload,
+              {
+                error,
+                message: error.message,
+              },
+            );
             throw 'Error';
           }),
         ),
