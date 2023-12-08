@@ -1,4 +1,4 @@
-import { ExternalSatuSehatService } from './external.satusehat.service';
+import { ExternalSatuSehatService } from './services/external.satusehat.service';
 import { Module } from '@nestjs/common';
 const providers = [ExternalSatuSehatService];
 
