@@ -12,6 +12,7 @@ import { LoggerService } from 'src/shared/services/logger.service';
 import { SatusehatAuthService } from './satu-sehat-get-token';
 import { CloudTasksService } from 'src/shared/services/google-cloud/services/cloud-tasks.service';
 import { google } from '@google-cloud/tasks/build/protos/protos';
+import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
 
 @Injectable()
 export class SatuSehatService {
@@ -180,7 +181,7 @@ export class SatuSehatService {
     return id;
   }
 
-  async postBundlesByDate(date: string, type: string, user: IJWTUser) {
+  async getBundlesByDate(date: string, type: string, user: IJWTUser) {
     const keys = await this.redisService.keyList('Information:*');
     const hospitalIds = keys.map((key) => {
       return key.split(':')[1].replace(/{|}/gi, '');
@@ -230,7 +231,7 @@ export class SatuSehatService {
           const task: google.cloud.tasks.v2.ITask = {
             httpRequest: {
               httpMethod: 'POST',
-              url: `https://integration-service-uhfll65gkq-et.a.run.app/satu-sehat/bundle?hospital_id=${hospitalId}`,
+              url: 'https://integration-service-uhfll65gkq-et.a.run.app/satu-sehat/bundle',
               headers: {
                 Authorization: `Bearer ${user.token}`,
               },
@@ -241,5 +242,10 @@ export class SatuSehatService {
         }
       }
     }
+  }
+
+  async postBundleFhir(payload: SatuSehatBundleCreateDto, hospitalId: string) {
+    const token = await this.satusehatAuthService.check(hospitalId);
+    await this.externalSatusehatService.fhirR4(payload, token, hospitalId);
   }
 }

@@ -25,6 +25,7 @@ import { ISatuSehatOrganizationCreateDto } from '../dtos/satu-sehat-organization
 import { ISatuSehatLocationCreateDto } from '../dtos/satu-sehat-location-create.dto';
 import { LoggerService } from 'src/shared/services/logger.service';
 import { SatusehatBundleGetDto } from '../dtos/satu-sehat-bundle-get.dto';
+import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
 
 @Controller('satu-sehat')
 @ApiTags('SatuSehat')
@@ -232,23 +233,41 @@ export class SatuSehatController {
     });
   }
 
-  @ApiOperation({ summary: 'POST To Satusehat Bundle Encounter & Condition' })
+  @ApiOperation({ summary: 'GET To Satusehat Bundle Encounter & Condition' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'POST To Satusehat Bundle Encounter & Condition',
+    description: 'GET To Satusehat Bundle Encounter & Condition',
   })
   @Get('bundle')
-  async postBundles(
+  async getBundles(
     @Query() payload: SatusehatBundleGetDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const user: IJWTUser = req.user as any;
-    await this.satusehatService.postBundlesByDate(
+    await this.satusehatService.getBundlesByDate(
       payload.date,
       payload.type,
       user,
     );
+    res.status(HttpStatus.CREATED).json({
+      error: false,
+      message: 'OK',
+    });
+  }
+
+  @ApiOperation({ summary: 'POST To Satusehat Bundle Encounter & Condition' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'POST To Satusehat Bundle Encounter & Condition',
+  })
+  @Post('bundle')
+  async postBundle(
+    @Body() payload: SatuSehatBundleCreateDto,
+    @Query('hospital_id') hospitalId: string,
+    @Res() res: Response,
+  ) {
+    await this.satusehatService.postBundleFhir(payload, hospitalId);
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',

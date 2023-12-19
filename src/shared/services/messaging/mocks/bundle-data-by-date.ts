@@ -163,7 +163,7 @@ const data = {
     {
       mr: '0000337057',
       treatment_no: '708386',
-      treatment_date: '2023-03-01',
+      treatment_date: '2023-03-03',
       patient_name: 'SUWARNI',
       patient_nik: '238713718123322',
       patient_ihs: 'P00912894463',
@@ -183,7 +183,7 @@ const data = {
     {
       mr: '0000334870',
       treatment_no: '708376',
-      treatment_date: '2023-01-31',
+      treatment_date: '2023-01-28',
       patient_name: 'KHAIRANI',
       patient_nik: '1387135618123322',
       patient_ihs: 'P02280547535',
