@@ -75,6 +75,14 @@ export class ConfigService {
     };
   }
 
+  get googleCloud() {
+    return {
+      projectId: this.get('GOOGLE_CLOUD_PROJECT_ID'),
+      location: this.get('GOOGLE_CLOUD_LOCATION'),
+      taskQueueName: this.get('GOOGLE_CLOUD_TASK_QUEUE_NAME'),
+    };
+  }
+
   // get typeOrmConfig(): TypeOrmModuleOptions {
   //   let entities = [__dirname + '/../../modules/**/*.entity{.ts,.js}'];
   //   let migrations = [__dirname + '/../../migrations/*{.ts,.js}'];
@@ -241,9 +249,10 @@ export class ConfigService {
       port: this.get('REDIS_PORT'),
       password: this.get('REDIS_PASSWORD'),
       role: this.get('REDIS_ROLE'),
-      user: this.get('REDIS_USER'),
+      user: this.get('REDIS_USERNAME'),
       prefix: this.get('REDIS_PREFIX'),
       connectionName: this.get('REDIS_CONNECTION_NAME'),
+      db: this.get('REDIS_DATABASE'),
     };
   }
 
@@ -269,7 +278,7 @@ export class ConfigService {
       password: this.get('RBAC_REDIS_PASSWORD'),
       role: this.get('RBAC_REDIS_ROLE'),
       user: this.get('RBAC_REDIS_USERNAME'),
-      db: this.get('RBAC_REDIS_DB'),
+      db: this.get('RBAC_REDIS_DATABASE'),
       connectionName: this.get('RBAC_REDIS_NAME'),
     };
   }
