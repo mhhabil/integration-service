@@ -10,4 +10,5 @@ export interface IJWTUser {
   id: string;
   exp: number;
   service: AuthService;
+  token: string;
 }
