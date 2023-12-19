@@ -1,5 +1,4 @@
 import { SatuSehatBundleCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-bundle-create.dto';
-import { DatetimeService } from 'src/shared/services/datetime.service';
 import { v4 as uuid } from 'uuid';
 
 export interface Entry {
@@ -156,10 +155,7 @@ export class SatuSehatBundleModel {
   type: string;
   entry: Entry[];
 
-  constructor(
-    model: SatuSehatBundleCreateDto,
-    private datetimeService: DatetimeService,
-  ) {
+  constructor(model: SatuSehatBundleCreateDto) {
     const encounterid = uuid();
     const uuids = model.icd_x.map(() => uuid());
     const diagnosis = model.icd_x.map((value, key) => {
@@ -223,9 +219,7 @@ export class SatuSehatBundleModel {
           },
           encounter: {
             reference: `urn:uuid:${encounterid}`,
-            display: `Kunjungan ${
-              model.patient_name
-            } pada ${datetimeService.getCurrentDate()}`,
+            display: `Kunjungan ${model.patient_name} pada ${model.treatment_date}`,
           },
         },
         request: {
@@ -273,10 +267,8 @@ export class SatuSehatBundleModel {
             },
           ],
           period: {
-            start: `${datetimeService.getCurrentDate()}T${
-              model.start_time
-            }+07:00`,
-            end: `${datetimeService.getCurrentDate()}T${model.end_time}+07:00`,
+            start: `${model.start_time}+07:00`,
+            end: `${model.end_time}+07:00`,
           },
           location: [
             {
@@ -291,34 +283,22 @@ export class SatuSehatBundleModel {
             {
               status: 'arrived',
               period: {
-                start: `${datetimeService.getCurrentDate()}T${
-                  model.start_time
-                }+07:00`,
-                end: `${datetimeService.getCurrentDate()}T${
-                  model.start_time
-                }+07:00`,
+                start: `${model.start_time}+07:00`,
+                end: `${model.start_time}+07:00`,
               },
             },
             {
               status: 'in-progress',
               period: {
-                start: `${datetimeService.getCurrentDate()}T${
-                  model.start_time
-                }+07:00`,
-                end: `${datetimeService.getCurrentDate()}T${
-                  model.end_time
-                }+07:00`,
+                start: `${model.start_time}+07:00`,
+                end: `${model.end_time}+07:00`,
               },
             },
             {
               status: 'finished',
               period: {
-                start: `${datetimeService.getCurrentDate()}T${
-                  model.end_time
-                }+07:00`,
-                end: `${datetimeService.getCurrentDate()}T${
-                  model.end_time
-                }+07:00`,
+                start: `${model.end_time}+07:00`,
+                end: `${model.end_time}+07:00`,
               },
             },
           ],
@@ -327,7 +307,7 @@ export class SatuSehatBundleModel {
           },
           identifier: [
             {
-              system: `http://sys-ids.kemkes.go.id/encounter/${encounterid}`,
+              system: `http://sys-ids.kemkes.go.id/encounter/${model.organization_id}`,
               value: `${model.mr}/${model.treatment_no}`,
             },
           ],
@@ -339,5 +319,8 @@ export class SatuSehatBundleModel {
       },
       ...conditions,
     ];
+  }
+  static createRequest(json: SatuSehatBundleCreateDto) {
+    return new SatuSehatBundleModel(json);
   }
 }

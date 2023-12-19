@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@gic-indonesia/messaging-socket": "https://storage.googleapis.com/backup.gic-indonesia.com/npm/gic-indonesia-messaging-client-1.2.5.tgz",
+    "@google-cloud/tasks": "^4.0.1",
     "@liaoliaots/nestjs-redis": "^9.0.5",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.0.0",
@@ -46,6 +47,7 @@
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "redis": "^4.6.11",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.1",

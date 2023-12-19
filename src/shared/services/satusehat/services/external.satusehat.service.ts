@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { RedisSharedService } from '../../redis.service';
 import { ISatuSehatOrganizationCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-organization-create.dto';
@@ -8,6 +8,8 @@ import { ExternalSatuSehatOrganizationDto } from '../dtos/organization/external.
 import { ISatuSehatLocationCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-location-create.dto';
 import { ExternalSatuSehatLocationDto } from '../dtos/location/external.satusehat-location.dto';
 import { LoggerService } from '../../logger.service';
+import { SatuSehatBundleCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-bundle-create.dto';
+import { SatuSehatBundleModel } from '../dtos/bundle/external.satusehat-bundle.dto';
 
 @Injectable()
 export class ExternalSatuSehatService {
@@ -22,34 +24,41 @@ export class ExternalSatuSehatService {
       `Information:{${hospital_id}}:satusehat`,
       '.',
     );
-    const config = await this._redisService.get(`Config:SatuSehat`, '.');
-    const { data } = await firstValueFrom(
-      this._httpService
-        .post(
-          `${config.auth_url}/accesstoken?grant_type=client_credentials`,
-          {
-            client_id: information.client_key,
-            client_secret: information.secret_key,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
+    if (information) {
+      const config = await this._redisService.get(`Config:SatuSehat`, '.');
+      const { data } = await firstValueFrom(
+        this._httpService
+          .post(
+            `${config.auth_url}/accesstoken?grant_type=client_credentials`,
+            {
+              client_id: information.client_key,
+              client_secret: information.secret_key,
             },
-          },
-        )
-        .pipe(
-          catchError((error: AxiosError) => {
-            this._loggerService.elasticError(
-              '/accesstoken?grant_type=client_credentials',
-              hospital_id,
-              error.request,
-              error.response,
-            );
-            throw error.message;
-          }),
-        ),
-    );
-    return data;
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+            },
+          )
+          .pipe(
+            catchError((error: AxiosError) => {
+              this._loggerService.elasticError(
+                '/accesstoken?grant_type=client_credentials',
+                hospital_id,
+                error.request,
+                error.response,
+              );
+              throw error.message;
+            }),
+          ),
+      );
+      return data;
+    } else {
+      return {
+        error: true,
+        message: 'No Client ID or Secret Key',
+      };
+    }
   }
 
   async getIHSPractitioner(hospital_id: string, nik: string) {
@@ -85,7 +94,6 @@ export class ExternalSatuSehatService {
           }),
         ),
     );
-    console.log('data', data);
     return data.entry && Array.isArray(data.entry) && data.entry[0]
       ? data.entry[0]
       : {};
@@ -268,5 +276,50 @@ export class ExternalSatuSehatService {
     )
       ? data.id
       : undefined;
+  }
+
+  async fhirR4(
+    payload: SatuSehatBundleCreateDto,
+    token: string,
+    hospital_id: string,
+  ) {
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const params = SatuSehatBundleModel.createRequest(payload);
+    try {
+      const { data, statusText } = await firstValueFrom(
+        this._httpService.post(`${config.base_url}`, params, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
+      const logsData =
+        data.entry &&
+        Array.isArray(data.entry) &&
+        data.entry.map((item) => {
+          return {
+            resourceType: item.resourceType,
+            status: item.status,
+            id: item.resourceID,
+          };
+        });
+      this._loggerService.elasticInfo('/bundle', hospital_id, params, {
+        error: false,
+        message: statusText,
+        data: logsData,
+      });
+    } catch (error) {
+      if (isAxiosError(error)) {
+        this._loggerService.elasticError('/bundle', hospital_id, params, {
+          error,
+          message: error.message,
+          data: error.response.data,
+        });
+      } else {
+        this._loggerService.elasticError('/bundle', hospital_id, params, {
+          error,
+          message: 'Unknown Error',
+          data: error,
+        });
+      }
+    }
   }
 }
