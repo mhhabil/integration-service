@@ -24,6 +24,7 @@ import { IJWTUser } from 'src/auth/jwt-payload.interface';
 import { ISatuSehatOrganizationCreateDto } from '../dtos/satu-sehat-organization-create.dto';
 import { ISatuSehatLocationCreateDto } from '../dtos/satu-sehat-location-create.dto';
 import { LoggerService } from 'src/shared/services/logger.service';
+import { SatusehatBundleGetDto } from '../dtos/satu-sehat-bundle-get.dto';
 
 @Controller('satu-sehat')
 @ApiTags('SatuSehat')
@@ -64,22 +65,12 @@ export class SatuSehatController {
       nik,
     );
     if (result) {
-      this._loggerService.elasticInfo(req.path, hospital_id, req.query, {
-        error: false,
-        message: 'OK',
-        data: result,
-      });
       res.status(HttpStatus.OK).json({
         error: false,
         message: 'OK',
         data: result,
       });
     } else {
-      this._loggerService.elasticError(req.path, hospital_id, req.query, {
-        error: true,
-        message: 'Data not found',
-        data: {},
-      });
       res.status(HttpStatus.NOT_FOUND).json({
         error: true,
         message: 'Data not found',
@@ -104,22 +95,12 @@ export class SatuSehatController {
       nik,
     );
     if (result) {
-      this._loggerService.elasticInfo(req.path, hospital_id, req.query, {
-        error: false,
-        message: 'OK',
-        data: result,
-      });
       res.status(HttpStatus.OK).json({
         error: false,
         message: 'OK',
         data: result,
       });
     } else {
-      this._loggerService.elasticError(req.path, hospital_id, req.query, {
-        error: true,
-        message: 'Data not found',
-        data: {},
-      });
       res.status(HttpStatus.NOT_FOUND).json({
         error: true,
         message: 'Data not found',
@@ -217,13 +198,9 @@ export class SatuSehatController {
   @Get('location')
   async findLocationById(
     @Query('hospital_id') hospital_id: string,
-    @Query('organization_id') organization_id: string,
     @Res() res: Response,
   ): Promise<void> {
-    const result = await this.satusehatService.findLocationById(
-      hospital_id,
-      organization_id,
-    );
+    const result = await this.satusehatService.findLocationById(hospital_id);
     res.status(HttpStatus.OK).json({
       error: false,
       data: result ?? [],
@@ -249,6 +226,29 @@ export class SatuSehatController {
       error: false,
       message: 'OK',
     });
+    res.status(HttpStatus.CREATED).json({
+      error: false,
+      message: 'OK',
+    });
+  }
+
+  @ApiOperation({ summary: 'POST To Satusehat Bundle Encounter & Condition' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'POST To Satusehat Bundle Encounter & Condition',
+  })
+  @Get('bundle')
+  async postBundles(
+    @Query() payload: SatusehatBundleGetDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user: IJWTUser = req.user as any;
+    await this.satusehatService.postBundlesByDate(
+      payload.date,
+      payload.type,
+      user,
+    );
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',

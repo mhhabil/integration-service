@@ -3,7 +3,7 @@ interface LocationMinified {
   name: string;
 }
 
-interface ICDX {
+interface ICD {
   id: string;
   display: string;
 }
@@ -11,6 +11,7 @@ interface ICDX {
 export interface SatuSehatBundleCreateDto {
   mr: string;
   treatment_no: string;
+  treatment_date: string;
   patient_name: string;
   patient_nik: string;
   patient_ihs: string;
@@ -19,9 +20,9 @@ export interface SatuSehatBundleCreateDto {
   doctor_ihs: string;
   start_time: string;
   end_time: string;
-  icd_x: ICDX[];
-  icd_ix: string;
+  icd_x: ICD[];
+  icd_ix?: ICD[];
   encounter_ends: string;
-  location: LocationMinified;
-  organization_id: string;
+  location?: LocationMinified;
+  organization_id?: string;
 }

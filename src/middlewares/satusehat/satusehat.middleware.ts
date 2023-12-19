@@ -1,5 +1,5 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, NextFunction } from 'express';
+import { HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, NextFunction, Response } from 'express';
 import { RedisSharedService } from 'src/shared/services/redis.service';
 import { ExternalSatuSehatService } from 'src/shared/services/satusehat/services/external.satusehat.service';
 import { AuthSatuSehat } from './interfaces/auth-satusehat';
@@ -12,24 +12,28 @@ export class SatuSehatMiddleware implements NestMiddleware {
   ) {}
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      const token = await this.redisService.get(
+      const session = await this.redisService.get(
         `Auth:{SatuSehat}:${req.query.hospital_id}`,
         '.',
       );
-      if (token) {
-        const expiresIn = new Date(token.expired_at);
+      if (session) {
+        const expiresIn = new Date(session.expired_at);
         const currentTime = new Date();
         if (expiresIn.getTime() < currentTime.getTime()) {
           const data = await this.externalSatuSehat.oauth(
             req.query.hospital_id as string,
           );
-          const storeData = AuthSatuSehat.create(data);
-          await this.redisService.set(
-            `Auth:{SatuSehat}:${req.query.hospital_id}`,
-            '$',
-            storeData,
-          );
-          next();
+          if (data && data.error) {
+            res.status(HttpStatus.FORBIDDEN).json(data);
+          } else {
+            const storeData = AuthSatuSehat.create(data);
+            await this.redisService.set(
+              `Auth:{SatuSehat}:${req.query.hospital_id}`,
+              '$',
+              storeData,
+            );
+            next();
+          }
         } else {
           next();
         }
@@ -37,13 +41,17 @@ export class SatuSehatMiddleware implements NestMiddleware {
         const data = await this.externalSatuSehat.oauth(
           req.query.hospital_id as string,
         );
-        const storeData = AuthSatuSehat.create(data);
-        await this.redisService.set(
-          `Auth:{SatuSehat}:${req.query.hospital_id}`,
-          '$',
-          storeData,
-        );
-        next();
+        if (data && data.error) {
+          res.status(HttpStatus.FORBIDDEN).json(data);
+        } else {
+          const storeData = AuthSatuSehat.create(data);
+          await this.redisService.set(
+            `Auth:{SatuSehat}:${req.query.hospital_id}`,
+            '$',
+            storeData,
+          );
+          next();
+        }
       }
     } catch (err) {
       console.log(err);
