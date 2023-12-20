@@ -163,15 +163,15 @@ const data = {
     {
       mr: '0000337057',
       treatment_no: '708386',
-      treatment_date: '2023-03-10',
+      treatment_date: '2023-03-14',
       patient_name: 'SUWARNI',
       patient_nik: '238713718123322',
       patient_ihs: 'P00912894463',
       doctor_name: 'Practitioner 9',
       doctor_nik: '894218334383713',
       doctor_ihs: '10014058550',
-      start_time: '2023-03-10T10:03:30',
-      end_time: '2023-03-10T14:59:18',
+      start_time: '2023-03-14T10:03:30',
+      end_time: '2023-03-14T14:59:18',
       icd_x: [
         {
           id: 'H52.4',
@@ -183,15 +183,15 @@ const data = {
     {
       mr: '0000334870',
       treatment_no: '708376',
-      treatment_date: '2023-01-01',
+      treatment_date: '2023-01-21',
       patient_name: 'KHAIRANI',
       patient_nik: '1387135618123322',
       patient_ihs: 'P02280547535',
       doctor_name: 'Practitioner 10',
       doctor_nik: '194218354383713',
       doctor_ihs: '10001915884',
-      start_time: '2023-01-01T07:03:30',
-      end_time: '2023-01-01T10:59:18',
+      start_time: '2023-01-21T07:03:30',
+      end_time: '2023-01-21T10:59:18',
       icd_x: [
         {
           id: 'H52.4',
