@@ -233,6 +233,7 @@ export class SatuSehatService {
               httpMethod: 'POST',
               url: `https://integration-service-uhfll65gkq-et.a.run.app/satu-sehat/bundle?hospital_id=${hospitalId}`,
               headers: {
+                'Content-Type': 'application/json',
                 Authorization: `Bearer ${user.token}`,
               },
               body: payload,
