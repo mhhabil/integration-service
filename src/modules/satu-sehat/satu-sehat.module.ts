@@ -33,6 +33,9 @@ export class SatuSehatModule implements NestModule {
         { path: 'satu-sehat/info', method: RequestMethod.POST },
         { path: 'satu-sehat/status', method: RequestMethod.GET },
         { path: 'satu-sehat/bundle', method: RequestMethod.GET },
+        { path: 'satu-sehat/simrs', method: RequestMethod.GET },
+        { path: 'satu-sehat/company', method: RequestMethod.GET },
+        { path: 'satu-sehat/data', method: RequestMethod.POST },
       )
       .forRoutes(SatuSehatController);
   }

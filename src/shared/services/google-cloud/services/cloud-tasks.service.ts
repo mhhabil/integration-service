@@ -18,6 +18,10 @@ export class CloudTasksService {
     );
   }
 
+  createPayload(payload: any) {
+    return Buffer.from(JSON.stringify(payload)).toString('base64');
+  }
+
   async createTask(task: google.cloud.tasks.v2.ITask) {
     await this.cloudTasksClient.createTask({ parent: this.getParent(), task });
   }
