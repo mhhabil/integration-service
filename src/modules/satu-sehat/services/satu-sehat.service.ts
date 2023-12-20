@@ -13,6 +13,7 @@ import { SatusehatAuthService } from './satu-sehat-get-token';
 import { CloudTasksService } from 'src/shared/services/google-cloud/services/cloud-tasks.service';
 import { google } from '@google-cloud/tasks/build/protos/protos';
 import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
+import { SatusehatBundleGetDto } from '../dtos/satu-sehat-bundle-get.dto';
 
 @Injectable()
 export class SatuSehatService {
@@ -34,6 +35,14 @@ export class SatuSehatService {
     );
 
     return !!result;
+  }
+
+  async getCompanies() {
+    const keys = await this.redisService.keyList('Information:*');
+    const hospitalIds = keys.map((key) => {
+      return key.split(':')[1].replace(/{|}/gi, '');
+    });
+    return hospitalIds;
   }
 
   async informationCreate(request: SatuSehatInformationDto, userId: string) {
@@ -174,24 +183,20 @@ export class SatuSehatService {
     if (id) {
       this.redisService.set(
         `Information:{${payload.hospital_id}}:satusehat`,
-        '$.location_id',
+        '$.location',
         id,
       );
     }
     return id;
   }
 
-  async getBundlesByDate(date: string, type: string, user: IJWTUser) {
-    const keys = await this.redisService.keyList('Information:*');
-    const hospitalIds = keys.map((key) => {
-      return key.split(':')[1].replace(/{|}/gi, '');
-    });
-    for (const hospitalId of hospitalIds) {
+  async getData(params: SatusehatBundleGetDto, user: IJWTUser) {
+    for (const hospitalId of params.hospital_ids) {
       const bundles = await this.messagingService.getBundleDataByDate(
         {
           hospital_id: hospitalId,
-          date,
-          service_type: type,
+          date: params.date,
+          service_type: params.type,
         },
         user.token,
       );
@@ -200,7 +205,7 @@ export class SatuSehatService {
         '.',
       );
       for (const encounter of bundles.data) {
-        const typeError = this.satusehatType.check({
+        const typeError = this.satusehatType.checkPhase1({
           ...encounter,
           location: info.location,
           organization_id: info.organization_id,
@@ -220,13 +225,73 @@ export class SatuSehatService {
             },
           );
         } else {
-          const payload = Buffer.from(
-            JSON.stringify({
+          const payload = this.cloudTasksService.createPayload({
+            ...encounter,
+            location: info.location,
+            organization_id: info.organization_id,
+          });
+
+          const task: google.cloud.tasks.v2.ITask = {
+            httpRequest: {
+              httpMethod: 'POST',
+              url: `https://integration-service-uhfll65gkq-et.a.run.app/satu-sehat/bundle?hospital_id=${hospitalId}`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`,
+              },
+              body: payload,
+            },
+          };
+          this.cloudTasksService.createTask(task);
+        }
+      }
+    }
+  }
+
+  async getBundles(user: IJWTUser) {
+    const keys = await this.redisService.keyList('Information:*');
+    const hospitalIds = keys.map((key) => {
+      return key.split(':')[1].replace(/{|}/gi, '');
+    });
+    for (const hospitalId of hospitalIds) {
+      const bundles = await this.messagingService.getBundleDataByDate(
+        {
+          hospital_id: hospitalId,
+          date: this.datetimeService.getCurrentDate(),
+          service_type: 'RawatJalan',
+        },
+        user.token,
+      );
+      const info = await this.redisService.get(
+        `Information:{${hospitalId}}:satusehat`,
+        '.',
+      );
+      for (const encounter of bundles.data) {
+        const typeError = this.satusehatType.checkPhase1({
+          ...encounter,
+          location: info.location,
+          organization_id: info.organization_id,
+        });
+        if (typeError.length > 0) {
+          this.loggerService.elasticError(
+            '/bundle',
+            hospitalId,
+            {
               ...encounter,
               location: info.location,
               organization_id: info.organization_id,
-            }),
-          ).toString('base64');
+            },
+            {
+              error: true,
+              message: `Property "${typeError.join(', ')}" is undefined`,
+            },
+          );
+        } else {
+          const payload = this.cloudTasksService.createPayload({
+            ...encounter,
+            location: info.location,
+            organization_id: info.organization_id,
+          });
 
           const task: google.cloud.tasks.v2.ITask = {
             httpRequest: {
@@ -248,5 +313,35 @@ export class SatuSehatService {
   async postBundleFhir(payload: SatuSehatBundleCreateDto, hospitalId: string) {
     const token = await this.satusehatAuthService.check(hospitalId);
     await this.externalSatusehatService.fhirR4(payload, token, hospitalId);
+  }
+
+  async getSimrsData(
+    hospital_id: string,
+    date: string,
+    type: string,
+    user: IJWTUser,
+  ) {
+    const bundles = await this.messagingService.getBundleDataByDate(
+      {
+        hospital_id,
+        date,
+        service_type: type,
+      },
+      user.token,
+    );
+    const info = await this.redisService.get(
+      `Information:{${hospital_id}}:satusehat`,
+      '.',
+    );
+    const typeChecked = bundles.data.map((item) => {
+      return {
+        ...item,
+        ...this.satusehatType.type(item),
+        organization_id: info.organization_id,
+        location: info.location,
+      };
+    });
+
+    return typeChecked;
   }
 }

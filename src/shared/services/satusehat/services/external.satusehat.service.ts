@@ -26,6 +26,7 @@ export class ExternalSatuSehatService {
     );
     if (information) {
       const config = await this._redisService.get(`Config:SatuSehat`, '.');
+      console.log('www');
       const { data } = await firstValueFrom(
         this._httpService
           .post(
@@ -292,7 +293,7 @@ export class ExternalSatuSehatService {
       data &&
       data.id
     )
-      ? data.id
+      ? { id: data.id, name: data.name }
       : undefined;
   }
 

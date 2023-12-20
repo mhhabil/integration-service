@@ -50,6 +50,16 @@ export class SatuSehatController {
     });
   }
 
+  @Get('company')
+  async getCompany(@Res() res: Response) {
+    const companies = await this.satusehatService.getCompanies();
+    res.status(HttpStatus.OK).json({
+      error: false,
+      message: 'OK',
+      data: companies,
+    });
+  }
+
   @ApiOperation({ summary: 'Get Practitioner By NIK' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Practitioner Found' })
   @ApiQuery({ name: 'hospital_id', required: true })
@@ -239,17 +249,28 @@ export class SatuSehatController {
     description: 'GET To Satusehat Bundle Encounter & Condition',
   })
   @Get('bundle')
-  async getBundles(
-    @Query() payload: SatusehatBundleGetDto,
+  async getBundles(@Req() req: Request, @Res() res: Response) {
+    const user: IJWTUser = req.user as any;
+    await this.satusehatService.getBundles(user);
+    res.status(HttpStatus.CREATED).json({
+      error: false,
+      message: 'OK',
+    });
+  }
+
+  @ApiOperation({ summary: 'POST To Satusehat Bundle Encounter & Condition' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'POST To Satusehat Bundle Encounter & Condition',
+  })
+  @Post('data')
+  async getData(
+    @Body() payload: SatusehatBundleGetDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const user: IJWTUser = req.user as any;
-    await this.satusehatService.getBundlesByDate(
-      payload.date,
-      payload.type,
-      user,
-    );
+    await this.satusehatService.getData(payload, user);
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
@@ -271,6 +292,28 @@ export class SatuSehatController {
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
+    });
+  }
+
+  @Get('simrs')
+  async getSimrsData(
+    @Query('hospital_id') hospital_id: string,
+    @Query('type') type: string,
+    @Query('date') date: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user: IJWTUser = req.user as any;
+    const data = await this.satusehatService.getSimrsData(
+      hospital_id,
+      date,
+      type,
+      user,
+    );
+    res.status(HttpStatus.OK).json({
+      error: false,
+      message: 'OK',
+      data,
     });
   }
 }

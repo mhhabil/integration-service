@@ -5,7 +5,7 @@ import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
 export class SatusehatTypeService {
   constructor() {}
 
-  check(data: SatuSehatBundleCreateDto) {
+  checkPhase1(data: SatuSehatBundleCreateDto) {
     const typeError = [];
     if (!data.doctor_ihs) {
       typeError.push('doctor_ihs');
@@ -23,5 +23,31 @@ export class SatusehatTypeService {
       typeError.push('end_time');
     }
     return typeError;
+  }
+
+  checkPhase2() {
+    return false;
+  }
+
+  checkPhase3() {
+    return false;
+  }
+
+  checkPhase4() {
+    return false;
+  }
+
+  checkPhase5() {
+    return false;
+  }
+
+  type(data: SatuSehatBundleCreateDto) {
+    return {
+      phase_1: !!this.checkPhase1(data),
+      phase_2: this.checkPhase2(),
+      phase_3: this.checkPhase3(),
+      phase_4: this.checkPhase4(),
+      phase_5: this.checkPhase5(),
+    };
   }
 }
