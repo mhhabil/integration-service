@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError, isAxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { RedisSharedService } from '../../redis.service';
 import { ISatuSehatOrganizationCreateDto } from 'src/modules/satu-sehat/dtos/satu-sehat-organization-create.dto';
@@ -303,41 +303,36 @@ export class ExternalSatuSehatService {
   ) {
     const config = await this._redisService.get(`Config:SatuSehat`, '.');
     const params = SatuSehatBundleModel.createRequest(payload);
-    try {
-      const { data, statusText } = await firstValueFrom(
-        this._httpService.post(`${config.base_url}`, params, {
+    const { data, statusText } = await firstValueFrom(
+      this._httpService
+        .post(`${config.base_url}`, params, {
           headers: { Authorization: `Bearer ${token}` },
-        }),
-      );
-      const logsData =
-        data.entry &&
-        Array.isArray(data.entry) &&
-        data.entry.map((item) => {
-          return {
-            resourceType: item.response.resourceType,
-            status: item.response.status,
-            id: item.response.resourceID,
-          };
-        });
-      this._loggerService.elasticInfo('/bundle', hospital_id, params, {
-        error: false,
-        message: statusText,
-        data: logsData,
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            this._loggerService.elasticError('/bundle', hospital_id, params, {
+              error: true,
+              message: error.message,
+              data: error.response.data,
+            });
+            throw error.message;
+          }),
+        ),
+    );
+    const logsData =
+      data.entry &&
+      Array.isArray(data.entry) &&
+      data.entry.map((item) => {
+        return {
+          resourceType: item.response.resourceType,
+          status: item.response.status,
+          id: item.response.resourceID,
+        };
       });
-    } catch (error) {
-      if (isAxiosError(error)) {
-        this._loggerService.elasticError('/bundle', hospital_id, params, {
-          error: true,
-          message: error.message,
-          data: error.response.data,
-        });
-      } else {
-        this._loggerService.elasticError('/bundle', hospital_id, params, {
-          error: true,
-          message: 'Unknown Error',
-          data: error,
-        });
-      }
-    }
+    this._loggerService.elasticInfo('/bundle', hospital_id, params, {
+      error: false,
+      message: statusText,
+      data: logsData,
+    });
   }
 }
