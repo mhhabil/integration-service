@@ -156,7 +156,16 @@ export class ExternalSatuSehatService {
         })
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
+            this._loggerService.elasticError(
+              '/bundle',
+              hospital_id,
+              { hospital_id },
+              {
+                error: true,
+                message: error.message,
+                data: error.response.data,
+              },
+            );
             throw 'Error';
           }),
         ),
@@ -226,7 +235,16 @@ export class ExternalSatuSehatService {
         })
         .pipe(
           catchError((error: AxiosError) => {
-            console.log(error);
+            this._loggerService.elasticError(
+              '/bundle',
+              hospital_id,
+              { organization_id: orgId },
+              {
+                error: true,
+                message: error.message,
+                data: error.response.data,
+              },
+            );
             throw 'Error';
           }),
         ),
@@ -291,15 +309,14 @@ export class ExternalSatuSehatService {
           headers: { Authorization: `Bearer ${token}` },
         }),
       );
-      console.log('Data: ', data);
       const logsData =
         data.entry &&
         Array.isArray(data.entry) &&
         data.entry.map((item) => {
           return {
-            resourceType: item.resourceType,
-            status: item.status,
-            id: item.resourceID,
+            resourceType: item.response.resourceType,
+            status: item.response.status,
+            id: item.response.resourceID,
           };
         });
       this._loggerService.elasticInfo('/bundle', hospital_id, params, {
@@ -308,16 +325,15 @@ export class ExternalSatuSehatService {
         data: logsData,
       });
     } catch (error) {
-      console.log('Error: ', error);
       if (isAxiosError(error)) {
         this._loggerService.elasticError('/bundle', hospital_id, params, {
-          error,
+          error: true,
           message: error.message,
           data: error.response.data,
         });
       } else {
         this._loggerService.elasticError('/bundle', hospital_id, params, {
-          error,
+          error: true,
           message: 'Unknown Error',
           data: error,
         });
