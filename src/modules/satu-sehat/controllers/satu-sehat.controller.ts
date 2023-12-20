@@ -267,6 +267,7 @@ export class SatuSehatController {
     @Query('hospital_id') hospitalId: string,
     @Res() res: Response,
   ) {
+    console.log('Payload: ', payload);
     await this.satusehatService.postBundleFhir(payload, hospitalId);
     res.status(HttpStatus.CREATED).json({
       error: false,

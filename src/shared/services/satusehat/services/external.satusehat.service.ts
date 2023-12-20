@@ -291,6 +291,7 @@ export class ExternalSatuSehatService {
           headers: { Authorization: `Bearer ${token}` },
         }),
       );
+      console.log('Data: ', data);
       const logsData =
         data.entry &&
         Array.isArray(data.entry) &&
@@ -307,6 +308,7 @@ export class ExternalSatuSehatService {
         data: logsData,
       });
     } catch (error) {
+      console.log('Error: ', error);
       if (isAxiosError(error)) {
         this._loggerService.elasticError('/bundle', hospital_id, params, {
           error,

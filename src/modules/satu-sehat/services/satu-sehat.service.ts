@@ -231,7 +231,7 @@ export class SatuSehatService {
           const task: google.cloud.tasks.v2.ITask = {
             httpRequest: {
               httpMethod: 'POST',
-              url: 'https://integration-service-uhfll65gkq-et.a.run.app/satu-sehat/bundle',
+              url: `https://integration-service-uhfll65gkq-et.a.run.app/satu-sehat/bundle?hospital_id=${hospitalId}`,
               headers: {
                 Authorization: `Bearer ${user.token}`,
               },
