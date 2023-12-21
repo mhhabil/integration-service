@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
 
 @Injectable()
 export class SatusehatTypeService {
   constructor() {}
 
-  checkPhase1(data: SatuSehatBundleCreateDto) {
+  checkPhase1(data: any) {
     const typeError = [];
     if (!data.doctor_ihs) {
       typeError.push('doctor_ihs');
@@ -41,9 +40,9 @@ export class SatusehatTypeService {
     return false;
   }
 
-  type(data: SatuSehatBundleCreateDto) {
+  type(data: any) {
     return {
-      phase_1: !!this.checkPhase1(data),
+      phase_1: !!(this.checkPhase1(data).length === 0),
       phase_2: this.checkPhase2(),
       phase_3: this.checkPhase3(),
       phase_4: this.checkPhase4(),

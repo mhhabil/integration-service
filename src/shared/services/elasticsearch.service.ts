@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as ElasticAgent from 'elastic-apm-node';
 import { ElasticsearchTransport } from 'winston-elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
 import { ConfigService } from './config.service';
 
@@ -8,6 +9,7 @@ import { ConfigService } from './config.service';
 export class ElasticsearchService {
   private readonly _apm: typeof ElasticAgent;
   private readonly _apmTransport: ElasticsearchTransport;
+  private readonly _elasticClient: Client;
 
   constructor(private readonly _configService: ConfigService) {
     if (_configService.elastic.apm.enabled) {
@@ -26,6 +28,15 @@ export class ElasticsearchService {
 
         active: this._configService.elastic.apm.enabled,
       });
+
+      // this._elasticClient = new Client({
+      //   cloud: {
+      //     id: this._configService.elastic.search.cloudId,
+      //   },
+      //   auth: {
+      //     apiKey: this._configService.elastic.search.apiKey,
+      //   },
+      // });
 
       this._apmTransport = new ElasticsearchTransport({
         apm: this._apm,
@@ -46,4 +57,8 @@ export class ElasticsearchService {
   get apmTransport(): ElasticsearchTransport {
     return this._apmTransport;
   }
+
+  // get client(): Client {
+  //   return this._elasticClient;
+  // }
 }
