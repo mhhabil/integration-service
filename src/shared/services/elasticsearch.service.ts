@@ -29,15 +29,6 @@ export class ElasticsearchService {
         active: this._configService.elastic.apm.enabled,
       });
 
-      // this._elasticClient = new Client({
-      //   cloud: {
-      //     id: this._configService.elastic.search.cloudId,
-      //   },
-      //   auth: {
-      //     apiKey: this._configService.elastic.search.apiKey,
-      //   },
-      // });
-
       this._apmTransport = new ElasticsearchTransport({
         apm: this._apm,
         level: 'info',
@@ -53,12 +44,20 @@ export class ElasticsearchService {
         },
       });
     }
+    this._elasticClient = new Client({
+      cloud: {
+        id: this._configService.elastic.search.cloudId,
+      },
+      auth: {
+        apiKey: this._configService.elastic.search.apiKey,
+      },
+    });
   }
   get apmTransport(): ElasticsearchTransport {
     return this._apmTransport;
   }
 
-  // get client(): Client {
-  //   return this._elasticClient;
-  // }
+  get client(): Client {
+    return this._elasticClient;
+  }
 }

@@ -26,7 +26,6 @@ export class ExternalSatuSehatService {
     );
     if (information) {
       const config = await this._redisService.get(`Config:SatuSehat`, '.');
-      console.log('www');
       const { data } = await firstValueFrom(
         this._httpService
           .post(
@@ -266,7 +265,7 @@ export class ExternalSatuSehatService {
       'access_token',
     );
     const params = ExternalSatuSehatLocationDto.createRequest(payload);
-    const { data, status } = await firstValueFrom(
+    const { data } = await firstValueFrom(
       this._httpService
         .post(`${config.base_url}/Location`, params, {
           headers: {
@@ -288,13 +287,7 @@ export class ExternalSatuSehatService {
           }),
         ),
     );
-    return !!(
-      status === (HttpStatus.OK || HttpStatus.CREATED) &&
-      data &&
-      data.id
-    )
-      ? { id: data.id, name: data.name }
-      : undefined;
+    return !!(data && data.id) ? { id: data.id, name: data.name } : undefined;
   }
 
   async fhirR4(
