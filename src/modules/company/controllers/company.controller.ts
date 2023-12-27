@@ -19,7 +19,7 @@ import { CompanyCreateDto } from '../dtos/company-create.dto';
 import { CompanyService } from '../services/company.service';
 import { IJWTUser } from 'src/auth/jwt-payload.interface';
 import { Request, Response } from 'express';
-import { LoggerService } from 'src/shared/services/logger.service';
+import { ElasticsearchService } from 'src/shared/services/elasticsearch.service';
 
 @Controller('company')
 @ApiTags('Company')
@@ -28,7 +28,7 @@ import { LoggerService } from 'src/shared/services/logger.service';
 export class CompanyController {
   constructor(
     private companyService: CompanyService,
-    private _loggerService: LoggerService,
+    private _elasticsearchService: ElasticsearchService,
   ) {}
 
   @ApiOperation({ summary: 'Create Company' })
