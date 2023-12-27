@@ -212,7 +212,7 @@ export class SatuSehatService {
         });
         if (typeError.length > 0) {
           this.loggerService.elasticError(
-            '/bundle',
+            '/satu-sehat/bundle',
             hospitalId,
             {
               ...encounter,
@@ -274,7 +274,7 @@ export class SatuSehatService {
         });
         if (typeError.length > 0) {
           this.loggerService.elasticError(
-            '/bundle',
+            '/satu-sehat/bundle',
             hospitalId,
             {
               ...encounter,
@@ -329,16 +329,16 @@ export class SatuSehatService {
       },
       user.token,
     );
-    const info = await this.redisService.get(
-      `Information:{${hospital_id}}:satusehat`,
-      '.',
-    );
+    // const info = await this.redisService.get(
+    //   `Information:{${hospital_id}}:satusehat`,
+    //   '.',
+    // );
     const typeChecked = bundles.data.map((item) => {
       return {
         ...item,
         ...this.satusehatType.type(item),
-        organization_id: info.organization_id,
-        location: info.location,
+        // organization_id: info.organization_id,
+        // location: info.location,
       };
     });
 

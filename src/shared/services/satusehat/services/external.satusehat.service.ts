@@ -80,7 +80,7 @@ export class ExternalSatuSehatService {
         .pipe(
           catchError((error: AxiosError) => {
             this._loggerService.elasticError(
-              '/practitioner',
+              '/satu-sehat/practitioner',
               hospital_id,
               {
                 nik,
@@ -118,7 +118,7 @@ export class ExternalSatuSehatService {
         .pipe(
           catchError((error: AxiosError) => {
             this._loggerService.elasticError(
-              '/patient',
+              '/satu-sehat/patient',
               hospital_id,
               {
                 nik,
@@ -157,7 +157,7 @@ export class ExternalSatuSehatService {
         .pipe(
           catchError((error: AxiosError) => {
             this._loggerService.elasticError(
-              '/bundle',
+              '/satu-sehat/bundle',
               hospital_id,
               { hospital_id },
               {
@@ -199,7 +199,7 @@ export class ExternalSatuSehatService {
         .pipe(
           catchError((error: AxiosError) => {
             this._loggerService.elasticError(
-              '/organization',
+              '/satu-sehat/organization',
               payload.hospital_id,
               payload,
               {
@@ -236,7 +236,7 @@ export class ExternalSatuSehatService {
         .pipe(
           catchError((error: AxiosError) => {
             this._loggerService.elasticError(
-              '/bundle',
+              '/satu-sehat/bundle',
               hospital_id,
               { organization_id: orgId },
               {
@@ -275,7 +275,7 @@ export class ExternalSatuSehatService {
         .pipe(
           catchError((error: AxiosError) => {
             this._loggerService.elasticError(
-              '/location',
+              '/satu-sehat/location',
               payload.hospital_id,
               payload,
               {
@@ -304,11 +304,16 @@ export class ExternalSatuSehatService {
         })
         .pipe(
           catchError((error: AxiosError) => {
-            this._loggerService.elasticError('/bundle', hospital_id, params, {
-              error: true,
-              message: error.message,
-              data: error.response.data,
-            });
+            this._loggerService.elasticError(
+              '/satu-sehat/bundle',
+              hospital_id,
+              params,
+              {
+                error: true,
+                message: error.message,
+                data: error.response.data,
+              },
+            );
             throw error.message;
           }),
         ),
@@ -323,7 +328,7 @@ export class ExternalSatuSehatService {
           id: item.response.resourceID,
         };
       });
-    this._loggerService.elasticInfo('/bundle', hospital_id, params, {
+    this._loggerService.elasticInfo('/satu-sehat/bundle', hospital_id, params, {
       error: false,
       message: statusText,
       data: logsData,

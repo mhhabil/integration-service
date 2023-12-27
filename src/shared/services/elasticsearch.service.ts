@@ -4,6 +4,7 @@ import { ElasticsearchTransport } from 'winston-elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 
 import { ConfigService } from './config.service';
+import { DatetimeService } from './datetime.service';
 
 @Injectable()
 export class ElasticsearchService {
@@ -11,7 +12,10 @@ export class ElasticsearchService {
   private readonly _apmTransport: ElasticsearchTransport;
   private readonly _elasticClient: Client;
 
-  constructor(private readonly _configService: ConfigService) {
+  constructor(
+    private readonly _configService: ConfigService,
+    private readonly _datetimeService: DatetimeService,
+  ) {
     if (_configService.elastic.apm.enabled) {
       this._apm = ElasticAgent.start({
         // Override service name from package.json
@@ -59,5 +63,77 @@ export class ElasticsearchService {
 
   get client(): Client {
     return this._elasticClient;
+  }
+
+  async query(
+    path: string,
+    index: string,
+    date: string,
+    from: number,
+    size: number,
+  ) {
+    const d = new Date(date);
+    d.setDate(d.getDate() - 1);
+    const startDate = this._datetimeService.getNormalDate(d);
+
+    const result = await this.client.search({
+      from,
+      size,
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc',
+            unmapped_type: 'boolean',
+          },
+        },
+      ],
+      query: {
+        bool: {
+          must: [],
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            _index: index,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            message: `gic-integration${path}`,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  format: 'strict_date_optional_time',
+                  gte: `${startDate}T17:00:00.000Z`,
+                  lte: `${date}T16:59:59.000Z`,
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+    return result;
   }
 }
