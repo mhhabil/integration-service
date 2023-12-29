@@ -37,12 +37,15 @@ export class SatuSehatService {
     return !!result;
   }
 
-  async getCompanies() {
+  async getCompanies(companyList: string[]) {
     const keys = await this.redisService.keyList('Information:*');
     const hospitalIds = keys.map((key) => {
       return key.split(':')[1].replace(/{|}/gi, '');
     });
-    return hospitalIds;
+    const result = hospitalIds.filter((company) =>
+      companyList.includes(company),
+    );
+    return result;
   }
 
   async informationCreate(request: SatuSehatInformationDto, userId: string) {
@@ -223,6 +226,7 @@ export class SatuSehatService {
               error: true,
               message: `Property "${typeError.join(', ')}" is undefined`,
             },
+            { encounter: encounter.treatment_no },
           );
         } else {
           const payload = this.cloudTasksService.createPayload({
@@ -285,6 +289,7 @@ export class SatuSehatService {
               error: true,
               message: `Property "${typeError.join(', ')}" is undefined`,
             },
+            { encounter: encounter.treatment_no },
           );
         } else {
           const payload = this.cloudTasksService.createPayload({
@@ -329,16 +334,16 @@ export class SatuSehatService {
       },
       user.token,
     );
-    // const info = await this.redisService.get(
-    //   `Information:{${hospital_id}}:satusehat`,
-    //   '.',
-    // );
+    const info = await this.redisService.get(
+      `Information:{${hospital_id}}:satusehat`,
+      '.',
+    );
     const typeChecked = bundles.data.map((item) => {
       return {
         ...item,
         ...this.satusehatType.type(item),
-        // organization_id: info.organization_id,
-        // location: info.location,
+        organization_id: info.organization_id,
+        location: info.location,
       };
     });
 

@@ -51,8 +51,10 @@ export class SatuSehatController {
   }
 
   @Get('company')
-  async getCompany(@Res() res: Response) {
-    const companies = await this.satusehatService.getCompanies();
+  async getCompany(@Req() req: Request, @Res() res: Response) {
+    const user: IJWTUser = req.user as any;
+    const companyList = await user.service.getCompanies(user.id);
+    const companies = await this.satusehatService.getCompanies(companyList);
     res.status(HttpStatus.OK).json({
       error: false,
       message: 'OK',
@@ -255,6 +257,7 @@ export class SatuSehatController {
     res.status(HttpStatus.CREATED).json({
       error: false,
       message: 'OK',
+      headers: req.headers,
     });
   }
 

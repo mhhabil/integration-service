@@ -50,10 +50,17 @@ export class LoggerService extends ConsoleLogger {
   }
 
   //Elastic Logger
-  elasticInfo(message: string, branch: string, req: object, res: object): void {
+  elasticInfo(
+    message: string,
+    branch: string,
+    req: object,
+    res: object,
+    meta: any = {},
+  ): void {
     this._logger.info(
       `${this._configService.elastic.apm.serviceName}${message}`,
       {
+        ...meta,
         service_name: this._configService.elastic.apm.serviceName,
         branch,
         environment: this._configService.nodeEnv,
@@ -67,10 +74,12 @@ export class LoggerService extends ConsoleLogger {
     branch: string,
     req: object,
     res: object,
+    meta: any = {},
   ): void {
     this._logger.error(
       `${this._configService.elastic.apm.serviceName}${message}`,
       {
+        ...meta,
         service_name: this._configService.elastic.apm.serviceName,
         branch,
         environment: this._configService.nodeEnv,

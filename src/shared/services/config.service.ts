@@ -42,7 +42,7 @@ export class ConfigService {
 
   get messaging() {
     return {
-      url: this.get('EMR_API_URL'),
+      url: this.get('GIC_API_URL'),
     };
   }
 
