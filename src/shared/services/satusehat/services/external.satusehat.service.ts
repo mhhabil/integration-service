@@ -313,6 +313,7 @@ export class ExternalSatuSehatService {
                 message: error.message,
                 data: error.response.data,
               },
+              { encounter: payload.treatment_no },
             );
             throw error.message;
           }),
@@ -328,10 +329,16 @@ export class ExternalSatuSehatService {
           id: item.response.resourceID,
         };
       });
-    this._loggerService.elasticInfo('/satu-sehat/bundle', hospital_id, params, {
-      error: false,
-      message: statusText,
-      data: logsData,
-    });
+    this._loggerService.elasticInfo(
+      '/satu-sehat/bundle',
+      hospital_id,
+      params,
+      {
+        error: false,
+        message: statusText,
+        data: logsData,
+      },
+      { encounter: payload.treatment_no },
+    );
   }
 }

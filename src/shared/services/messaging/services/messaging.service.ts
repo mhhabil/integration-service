@@ -16,7 +16,7 @@ export class MessagingService {
     const { data } = await firstValueFrom(
       this._httpService
         .get(
-          `${this._configService.messaging.url}/integration/satusehat?hospital_id=${params.hospital_id}&date=${params.date}&type=${params.service_type}`,
+          `${this._configService.messaging.url}/emr/integration/satusehat?hospital_id=${params.hospital_id}&date=${params.date}&type=${params.service_type}`,
           {
             headers: {
               'x-token': token,
@@ -25,6 +25,7 @@ export class MessagingService {
         )
         .pipe(
           catchError((error: AxiosError) => {
+            console.log('err', error);
             throw error.message;
           }),
         ),

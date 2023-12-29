@@ -14,37 +14,26 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Response } from 'express';
-import { ElasticsearchService } from 'src/shared/services/elasticsearch.service';
 import { LogGetDto } from '../dtos/log-get.dto';
+import { LogService } from '../services/log.service';
 
 @Controller('log')
 @ApiTags('Log')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class LogController {
-  constructor(private _elasticsearchService: ElasticsearchService) {}
+  constructor(private _logService: LogService) {}
 
-  @ApiOperation({ summary: 'Get Company' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Company Found' })
+  @ApiOperation({ summary: 'Get Logs' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Logs Found' })
   @Get()
   async findAll(@Query() query: LogGetDto, @Res() res: Response) {
-    const result = await this._elasticsearchService.query(
-      query.path,
-      query.index,
-      query.date,
-      +query.from,
-      +query.size,
-    );
-    const total =
-      result.hits.total && !(typeof result.hits.total === 'number')
-        ? result.hits.total.value
-        : result.hits.total;
-    const { hits } = result.hits;
+    const { records, total } = await this._logService.findAll(query);
     res.status(HttpStatus.OK).json({
       error: false,
       total,
-      filtered: hits.length,
-      records: hits,
+      filtered: records.length,
+      records: records,
     });
   }
 }

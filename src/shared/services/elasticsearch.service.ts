@@ -69,6 +69,7 @@ export class ElasticsearchService {
     path: string,
     index: string,
     date: string,
+    branch: string,
     from: number,
     size: number,
   ) {
@@ -112,6 +113,18 @@ export class ElasticsearchService {
                         {
                           match_phrase: {
                             message: `gic-integration${path}`,
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            'fields.branch': branch,
                           },
                         },
                       ],
