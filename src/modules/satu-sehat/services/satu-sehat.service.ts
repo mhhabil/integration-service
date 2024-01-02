@@ -258,10 +258,12 @@ export class SatuSehatService {
       return key.split(':')[1].replace(/{|}/gi, '');
     });
     for (const hospitalId of hospitalIds) {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
       const bundles = await this.messagingService.getBundleDataByDate(
         {
           hospital_id: hospitalId,
-          date: this.datetimeService.getCurrentDate(),
+          date: this.datetimeService.getNormalDate(d),
           service_type: 'RawatJalan',
         },
         user.token,
