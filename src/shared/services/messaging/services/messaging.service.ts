@@ -25,7 +25,6 @@ export class MessagingService {
         )
         .pipe(
           catchError((error: AxiosError) => {
-            console.log('err', error);
             throw error.message;
           }),
         ),
