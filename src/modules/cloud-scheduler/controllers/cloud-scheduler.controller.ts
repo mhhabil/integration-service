@@ -8,10 +8,17 @@ export class CloudSchedulerController {
 
   @Get('satusehat')
   async getSatusehat(@Req() req: Request, @Res() res: Response) {
-    await this._cloudSchedulerService.getSatusehat();
-    res.status(HttpStatus.CREATED).json({
-      error: false,
-      message: 'OK',
-    });
+    if (req.headers['user-agent'] === 'Google-Cloud-Scheduler') {
+      await this._cloudSchedulerService.getSatusehat();
+      res.status(HttpStatus.CREATED).json({
+        error: false,
+        message: 'OK',
+      });
+    } else {
+      res.status(HttpStatus.FORBIDDEN).json({
+        error: true,
+        message: 'Invalid User Agent',
+      });
+    }
   }
 }
