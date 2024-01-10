@@ -13,6 +13,7 @@ import { SatusehatTypeService } from './services/satu-sehat-type.service';
 import { SatusehatAuthService } from './services/satu-sehat-get-token';
 import { CloudTasksService } from 'src/shared/services/google-cloud/services/cloud-tasks.service';
 import { GoogleCloudModule } from 'src/shared/services/google-cloud/google-cloud.module';
+import { SatusehatKYC } from './services/satu-sehat-kyc';
 
 @Module({
   imports: [SharedModule, ExternalSatuSehatModule, GoogleCloudModule],
@@ -21,6 +22,7 @@ import { GoogleCloudModule } from 'src/shared/services/google-cloud/google-cloud
     SatuSehatService,
     SatusehatTypeService,
     SatusehatAuthService,
+    SatusehatKYC,
     CloudTasksService,
   ],
 })
