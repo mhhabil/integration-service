@@ -26,6 +26,11 @@ import { ISatuSehatLocationCreateDto } from '../dtos/satu-sehat-location-create.
 import { LoggerService } from 'src/shared/services/logger.service';
 import { SatusehatBundleGetDto } from '../dtos/satu-sehat-bundle-get.dto';
 import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
+import {
+  IGetSatusehatKyc,
+  ISatusehatKycInitiateDto,
+} from '../dtos/satu-sehat-kyc-initiate.dto';
+import { SatusehatKYC } from '../services/satu-sehat-kyc';
 
 @Controller('satu-sehat')
 @ApiTags('SatuSehat')
@@ -35,6 +40,7 @@ export class SatuSehatController {
   constructor(
     private satusehatService: SatuSehatService,
     private _loggerService: LoggerService,
+    private _kycService: SatusehatKYC,
   ) {}
 
   @Get('status')
@@ -313,6 +319,29 @@ export class SatuSehatController {
       type,
       user,
     );
+    res.status(HttpStatus.OK).json({
+      error: false,
+      message: 'OK',
+      data,
+    });
+  }
+
+  @Get('kyc')
+  async getKyc(@Query() query: IGetSatusehatKyc, @Res() res: Response) {
+    const data = await this._kycService.getKyc(query);
+    res.status(HttpStatus.OK).json({
+      error: false,
+      data,
+    });
+  }
+
+  @Post('kyc')
+  async initiateKyc(
+    @Body() payload: ISatusehatKycInitiateDto,
+    @Query('hospital_id') hospital_id: string,
+    @Res() res: Response,
+  ) {
+    const data = await this._kycService.postKyc({ ...payload, hospital_id });
     res.status(HttpStatus.OK).json({
       error: false,
       message: 'OK',
