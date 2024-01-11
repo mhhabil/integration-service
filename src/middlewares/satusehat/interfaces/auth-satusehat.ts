@@ -1,3 +1,5 @@
+import { DatetimeService } from 'src/shared/services/datetime.service';
+
 export interface IAuthSatuSehat {
   refresh_token_expires_in: string;
   api_product_list: string;
@@ -37,7 +39,7 @@ export class AuthSatuSehat {
     const curr = new Date();
     const milis = parseInt(model.expires_in) * 1000;
     const expiredAt: any = new Date(curr.getTime() + milis);
-    const utcDate: any = expiredAt.toLocaleString();
+    const utcDate: any = DatetimeService.convertToNormalDatetime(expiredAt);
 
     this.refresh_token_expires_in = model.refresh_token_expires_in;
     this.api_product_list = model.api_product_list;
