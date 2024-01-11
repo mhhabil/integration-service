@@ -22,7 +22,7 @@ lerna-debug.log*
 /.nyc_output
 
 # Files
-publicKey.pem
+# publicKey.pem
 
 # IDEs and editors
 /.idea
