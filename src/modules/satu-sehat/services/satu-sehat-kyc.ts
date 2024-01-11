@@ -18,9 +18,10 @@ import {
   SatusehatKycInitiateDto,
 } from '../dtos/satu-sehat-kyc-initiate.dto';
 import { AxiosError } from 'axios';
-import * as fs from 'node:fs/promises';
+import * as fs from 'fs';
 import { DatetimeService } from 'src/shared/services/datetime.service';
 import { LoggerService } from 'src/shared/services/logger.service';
+import * as path from 'path';
 
 @Injectable()
 export class SatusehatKYC {
@@ -40,8 +41,29 @@ export class SatusehatKYC {
   ) {}
 
   async getServerPem() {
-    const path = 'publicKey.pem';
-    return await fs.readFile(path, 'utf8');
+    const config = await this._redisService.get(`Config:SatuSehat`, '.');
+    const pathname = `docs/publicKey.pem`;
+    const paths: Array<string> = pathname.split('/');
+    let directory = __dirname;
+    if (!fs.existsSync(path.resolve(__dirname, pathname))) {
+      for (let i = 0; i < paths.length - 1; i++) {
+        if (paths[i] !== '') {
+          directory = `${directory}/${paths[i]}`;
+          if (!fs.existsSync(directory)) {
+            fs.mkdirSync(directory);
+          }
+        }
+      }
+      try {
+        fs.writeFileSync(path.resolve(__dirname, pathname), config.kyc_pub_key);
+        return fs.readFileSync(path.resolve(__dirname, pathname), 'utf8');
+      } catch (err) {
+        console.error(err);
+        return undefined;
+      }
+    } else {
+      return fs.readFileSync(path.resolve(__dirname, pathname), 'utf8');
+    }
   }
 
   async getKeyPair(): Promise<[string, string]> {
