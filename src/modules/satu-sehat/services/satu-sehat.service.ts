@@ -170,7 +170,17 @@ export class SatuSehatService {
       hospital_id,
       organizationId,
     );
-    return data.filter((item) => !!(item.resource.status === 'active'));
+    const records = data.filter(
+      (item) => !!(item.resource.status === 'active'),
+    );
+    if (records.length > 0) {
+      this.redisService.set(
+        `Information:{${hospital_id}}:satusehat`,
+        '$.location',
+        { id: records[0].resource.id, name: records[0].resource.name },
+      );
+    }
+    return records;
   }
 
   async createLocation(payload: ISatuSehatLocationCreateDto) {
