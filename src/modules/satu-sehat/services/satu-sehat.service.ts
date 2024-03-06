@@ -14,7 +14,7 @@ import { CloudTasksService } from 'src/shared/services/google-cloud/services/clo
 import { google } from '@google-cloud/tasks/build/protos/protos';
 import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
 import { SatusehatBundleGetDto } from '../dtos/satu-sehat-bundle-get.dto';
-import moment from 'moment';
+import * as moment from 'moment';
 @Injectable()
 export class SatuSehatService {
   constructor(
