@@ -14,6 +14,7 @@ import { CloudTasksService } from 'src/shared/services/google-cloud/services/clo
 import { google } from '@google-cloud/tasks/build/protos/protos';
 import { SatuSehatBundleCreateDto } from '../dtos/satu-sehat-bundle-create.dto';
 import { SatusehatBundleGetDto } from '../dtos/satu-sehat-bundle-get.dto';
+import moment from 'moment';
 @Injectable()
 export class SatuSehatService {
   constructor(
@@ -267,12 +268,14 @@ export class SatuSehatService {
       return key.split(':')[1].replace(/{|}/gi, '');
     });
     for (const hospitalId of hospitalIds) {
-      const d = new Date();
-      d.setDate(d.getDate() - 1);
+      const dateFormat = moment()
+        .utcOffset('+07:00')
+        .subtract(5, 'days')
+        .format('YYYY-MM-DD');
       const bundles = await this.messagingService.getBundleDataByDate(
         {
           hospital_id: hospitalId,
-          date: this.datetimeService.getNormalDate(d),
+          date: dateFormat,
           service_type: 'RawatJalan',
         },
         user.token,
