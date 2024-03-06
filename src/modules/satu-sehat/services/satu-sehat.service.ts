@@ -361,6 +361,9 @@ export class SatuSehatService {
       };
     });
 
-    return typeChecked;
+    return {
+      data: typeChecked,
+      qualified: typeChecked.filter((c) => !!c.phase_1).length,
+    };
   }
 }

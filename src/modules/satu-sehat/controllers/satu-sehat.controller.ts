@@ -322,7 +322,8 @@ export class SatuSehatController {
     res.status(HttpStatus.OK).json({
       error: false,
       message: 'OK',
-      data,
+      data: data.data,
+      qualified: data.qualified,
     });
   }
 
