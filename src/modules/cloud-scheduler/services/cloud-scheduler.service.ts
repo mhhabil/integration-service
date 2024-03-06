@@ -5,6 +5,7 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { LoggerService } from 'src/shared/services/logger.service';
 import { DatetimeService } from 'src/shared/services/datetime.service';
+import * as moment from 'moment';
 
 @Injectable()
 export class CloudSchedulerService {
@@ -29,7 +30,11 @@ export class CloudSchedulerService {
             this._loggerService.elasticError(
               '/cloud-scheduler/satusehat',
               'ALL',
-              error.request,
+              {
+                timestamp: moment()
+                  .utcOffset('+07:00')
+                  .format('YYYY-MM-DD HH:mm:ss'),
+              },
               error.response.data as any,
             );
             throw error.message;
@@ -68,7 +73,11 @@ export class CloudSchedulerService {
             this._loggerService.elasticError(
               '/cloud-scheduler/get-token',
               'TOKEN',
-              error.request,
+              {
+                timestamp: moment()
+                  .utcOffset('+07:00')
+                  .format('YYYY-MM-DD HH:mm:ss'),
+              },
               error.response.data as object,
             );
             throw error.message;
