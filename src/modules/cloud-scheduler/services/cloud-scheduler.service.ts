@@ -46,10 +46,10 @@ export class CloudSchedulerService {
       '/cloud-scheduler/satusehat',
       'ALL',
       {
-        time: this._datetimeService.getCurrentDatetime(),
+        timestamp: moment().utcOffset('+07:00').format('YYYY-MM-DD HH:mm:ss'),
       },
       {
-        time: this._datetimeService.getCurrentDatetime(),
+        timestamp: moment().utcOffset('+07:00').format('YYYY-MM-DD HH:mm:ss'),
       },
     );
   }
