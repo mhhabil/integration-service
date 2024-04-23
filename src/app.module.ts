@@ -3,8 +3,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TerminusModule } from '@nestjs/terminus';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { RedisModule } from '@liaoliaots/nestjs-redis';
+import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import RequiredModules from './modules';
+import { ConfigService } from './shared/services/config.service';
 
 @Module({
   imports: [
@@ -16,17 +19,34 @@ import { ConfigModule } from '@nestjs/config';
         limit: +process.env.THROTTLER_LIMIT,
       },
     ]),
-    RedisModule.forRoot({
-      readyLog: true,
-      errorLog: true,
-      config: {
-        host: process.env.REDIS_HOST,
-        port: +process.env.REDIS_PORT,
-        username: process.env.REDIS_USERNAME,
-        password: process.env.REDIS_PASSWORD,
-        db: +process.env.REDIS_DATABASE,
+    RedisModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (
+        configService: ConfigService,
+      ): Promise<RedisModuleOptions> => {
+        return {
+          config: [
+            {
+              host: configService.redis.host,
+              port: +configService.redis.port,
+              username: configService.redis.user,
+              password: configService.redis.password,
+              db: +configService.redis.db,
+            },
+            {
+              namespace: 'RBAC',
+              host: configService.redisRBAC.host,
+              port: +configService.redisRBAC.port,
+              username: configService.redisRBAC.user,
+              password: configService.redisRBAC.password,
+              db: +configService.redisRBAC.db,
+            },
+          ],
+        };
       },
     }),
+    AuthModule,
+    ...RequiredModules,
   ],
   controllers: [AppController],
   providers: [AppService],

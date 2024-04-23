@@ -1,4 +1,7 @@
 import * as dotenv from 'dotenv';
+import * as winston from 'winston';
+import * as DailyRotateFile from 'winston-daily-rotate-file';
+import { ISwaggerConfigInterface } from 'src/interfaces';
 
 export class ConfigService {
   constructor() {
@@ -37,6 +40,12 @@ export class ConfigService {
     };
   }
 
+  get messaging() {
+    return {
+      url: this.get('GIC_API_URL'),
+    };
+  }
+
   get apiPrefix() {
     let prefix = this.get('API_PREFIX');
     if (!prefix) {
@@ -48,15 +57,31 @@ export class ConfigService {
     return prefix;
   }
 
-  // get swaggerConfig(): ISwaggerConfigInterface {
-  //   return {
-  //     path: this.get('SWAGGER_PATH') || '/api/docs',
-  //     title: this.get('SWAGGER_TITLE') || 'My API',
-  //     description: this.get('SWAGGER_DESCRIPTION'),
-  //     version: this.get('SWAGGER_VERSION') || '0.0.1',
-  //     scheme: this.get('SWAGGER_SCHEME') === 'https' ? 'https' : 'http',
-  //   };
-  // }
+  get swaggerConfig(): ISwaggerConfigInterface {
+    return {
+      path: this.get('SWAGGER_PATH') || '/api/docs',
+      title: this.get('SWAGGER_TITLE') || 'My API',
+      description: this.get('SWAGGER_DESCRIPTION'),
+      version: this.get('SWAGGER_VERSION') || '0.0.1',
+      scheme: this.get('SWAGGER_SCHEME') === 'https' ? 'https' : 'http',
+    };
+  }
+
+  get alya() {
+    return {
+      host: this.get('ALYA_HOST'),
+      room: this.get('ALYA_ROOM'),
+      secret: this.get('ALYA_SECRET'),
+    };
+  }
+
+  get googleCloud() {
+    return {
+      projectId: this.get('GOOGLE_CLOUD_PROJECT_ID'),
+      location: this.get('GOOGLE_CLOUD_LOCATION'),
+      taskQueueName: this.get('GOOGLE_CLOUD_TASK_QUEUE_NAME'),
+    };
+  }
 
   // get typeOrmConfig(): TypeOrmModuleOptions {
   //   let entities = [__dirname + '/../../modules/**/*.entity{.ts,.js}'];
@@ -146,53 +171,54 @@ export class ConfigService {
   //   };
   // }
 
-  // get winstonConfig() {
-  //   return {
-  //     transports: [
-  //       new DailyRotateFile({
-  //         level: 'debug',
-  //         filename: `./logs/${this.nodeEnv}/debug-%DATE%.log`,
-  //         datePattern: 'YYYY-MM-DD',
-  //         zippedArchive: true,
-  //         maxSize: '20m',
-  //         maxFiles: '14d',
-  //         format: winston.format.combine(
-  //           winston.format.timestamp(),
-  //           winston.format.json(),
-  //         ),
-  //       }),
-  //       new DailyRotateFile({
-  //         level: 'error',
-  //         filename: `./logs/${this.nodeEnv}/error-%DATE%.log`,
-  //         datePattern: 'YYYY-MM-DD',
-  //         zippedArchive: false,
-  //         maxSize: '20m',
-  //         maxFiles: '30d',
-  //         format: winston.format.combine(
-  //           winston.format.timestamp(),
-  //           winston.format.json(),
-  //         ),
-  //       }),
-  //       new winston.transports.Console({
-  //         level: 'debug',
-  //         handleExceptions: true,
-  //         format: winston.format.combine(
-  //           winston.format.colorize(),
-  //           winston.format.timestamp({
-  //             format: 'DD-MM-YYYY HH:mm:ss',
-  //           }),
-  //           winston.format.simple(),
-  //         ),
-  //       }),
-  //     ],
-  //     exitOnError: false,
-  //   };
-  // }
+  get winstonConfig() {
+    return {
+      transports: [
+        new DailyRotateFile({
+          level: 'debug',
+          filename: `./logs/${this.nodeEnv}/debug-%DATE%.log`,
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: true,
+          maxSize: '20m',
+          maxFiles: '14d',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json(),
+          ),
+        }),
+        new DailyRotateFile({
+          level: 'error',
+          filename: `./logs/${this.nodeEnv}/error-%DATE%.log`,
+          datePattern: 'YYYY-MM-DD',
+          zippedArchive: false,
+          maxSize: '20m',
+          maxFiles: '30d',
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json(),
+          ),
+        }),
+        new winston.transports.Console({
+          level: 'debug',
+          handleExceptions: true,
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.timestamp({
+              format: 'DD-MM-YYYY HH:mm:ss',
+            }),
+            winston.format.simple(),
+          ),
+        }),
+      ],
+      exitOnError: false,
+    };
+  }
 
   get elastic() {
     return {
       apm: {
         enabled: this.get('ELASTIC_APM_ENABLED') == 'true',
+        apiKey: this.get('ELASTIC_APM_API_KEY'),
         serviceName: this.get('ELASTIC_APM_SERVICE_NAME'),
         secretToken: this.get('ELASTIC_APM_SECRET_TOKEN'),
         serverUrl: this.get('ELASTIC_APM_SERVER_URL'),
@@ -202,6 +228,8 @@ export class ConfigService {
       },
       search: {
         enabled: this.get('ELASTIC_SEARCH_ENABLED') || false,
+        cloudId: this.get('ELASTIC_SEARCH_CLOUD_ID'),
+        apiKey: this.get('ELASTIC_SEARCH_API_KEY'),
       },
     };
   }
@@ -221,9 +249,10 @@ export class ConfigService {
       port: this.get('REDIS_PORT'),
       password: this.get('REDIS_PASSWORD'),
       role: this.get('REDIS_ROLE'),
-      user: this.get('REDIS_USER'),
+      user: this.get('REDIS_USERNAME'),
       prefix: this.get('REDIS_PREFIX'),
       connectionName: this.get('REDIS_CONNECTION_NAME'),
+      db: this.get('REDIS_DATABASE'),
     };
   }
 
@@ -243,14 +272,14 @@ export class ConfigService {
 
   get redisRBAC() {
     return {
-      host: this.get('RBAC_CONNECTION_HOST'),
-      port: this.get('RBAC_CONNECTION_PORT'),
-      prefix: this.get('RBAC_CONNECTION_PREFIX'),
-      password: this.get('RBAC_CONNECTION_PASSWORD'),
-      role: this.get('RBAC_CONNECTION_ROLE'),
-      user: this.get('RBAC_CONNECTION_USERNAME'),
-      db: this.get('RBAC_CONNECTION_DB'),
-      connectionName: this.get('RBAC_CONNECTION_NAME'),
+      host: this.get('RBAC_REDIS_HOST'),
+      port: this.get('RBAC_REDIS_PORT'),
+      prefix: this.get('RBAC_REDIS_PREFIX'),
+      password: this.get('RBAC_REDIS_PASSWORD'),
+      role: this.get('RBAC_REDIS_ROLE'),
+      user: this.get('RBAC_REDIS_USERNAME'),
+      db: this.get('RBAC_REDIS_DATABASE'),
+      connectionName: this.get('RBAC_REDIS_NAME'),
     };
   }
 
